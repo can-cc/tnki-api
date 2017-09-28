@@ -1,0 +1,2 @@
+#!/bin/sh
+watchman-make -p 'src/**/*.cljs' 'test/**/*.cljs' --make=scripts/test -s 2 -t test

@@ -1,0 +1,5 @@
+name: Tnki
+commitrun: false
+flow:
+  - install: LEIN_ROOT=true lein npm install
+  - test: LEIN_ROOT=true ./scripts/test

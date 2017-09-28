@@ -1,0 +1,2 @@
+#!/bin/sh
+rlwrap lein trampoline run -m clojure.main scripts/test.clj && node scripts/test-runner

@@ -18,7 +18,10 @@
   :npm {:dependencies [[source-map-support "0.4.0"]
                        [colors "1.1.2"]
                        [ora "v1.3.0"]
-                       [express "v4.15.5"]]
+                       [express "v4.15.5"]
+                       [bcryptjs "v2.4.3"]
+                       [body-parser "v1.18.2"]
+                       [knex "v0.13.0"]]
         :description "tnki"
         :name "tnki",
         :main "out/tnki"

@@ -1,11 +1,11 @@
 <template>
   <div class="post-page">
 
-    <form>
+    <form v-on:submit="post($event)">
       <div class="post-input">
-        <div>
+        <h2>
           Front:
-        </div>
+        </h2>
         <div>
 
         </div>
@@ -16,9 +16,9 @@
       </div>
 
       <div class="post-input">
-        <div>
+        <h2>
           Backend:
-        </div>
+        </h2>
         <div class="input-area">
           <textarea :value="inputBackend" @input="updateBackend"></textarea>
           <div class="input-preview" v-html="compiledBackendMarkdown"></div>
@@ -26,6 +26,9 @@
       </div>
 
 
+      <div>
+        <Button type="submit">Post</Button>
+      </div>
     </form>
   </div>
 </template>
@@ -52,11 +55,11 @@
       }
     },
     methods: {
-      async signIn (event) {
+      async post (event) {
         event.preventDefault()
-        await axios.post('/api/signin', {
-          email: this.email,
-          password: this.password
+        await axios.post('/api/cards', {
+          front: this.inputFront,
+          back: this.inputBackend
         })
       },
       updateFront: _.debounce(function (e) {
@@ -77,6 +80,14 @@
 
   .input-area {
     display: flex;
+    position: relative;
+    background-color: #e8e8e8;
+    overflow: hidden;
+    border: 1px solid #e8e8e8;
+    height: 250px;
+    max-width: 800px;
+    margin: 0 auto;
+    border-radius: 2px;
   }
 
   .input-area textarea {
@@ -84,9 +95,16 @@
     border: 0;
     resize: none;
     outline: none;
+    width: 50%;
+    display: block;
+    font-size: 1.1rem;
   }
 
   .input-preview {
-
+    box-sizing: border-box;
+    padding-left: 10px;
+    width: 50%;
+    font-size: 12px;
+    text-align: left;
   }
 </style>

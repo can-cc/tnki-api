@@ -3,3 +3,7 @@ test-out/
 out
 node_modules/
 .cljs_node_repl/
+db.sqlite3
+.nrepl-port
+.nrepl-port
+db.sqlite3

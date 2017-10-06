@@ -59,11 +59,32 @@
 
                  ))))
 
-(. app (get "/api/cards"
-            (fn [req res] (. res (send "Hello world")))))
-
 (. app (post "/api/cards"
-             (fn [req res] (. res (send "Hello world")))))
+            (fn [req res]
+              (let [body (.-body req)
+                    front-text (.-front body)
+                    back-text (.-back body)]
+                (-> (knex "card")
+                    (.insert (clj->js {:front_text front-text
+                                       :back_text back-text
+                                       :created_at (js/Date.)}))
+                    (.returning "*")
+                    (.then (fn [results]
+                             (println "post card" front-text)
+                             (.status res 204)
+                             (.send res))))))))
+
+(. app (get "/api/cards"
+            (fn [req res]
+              (-> (knex "learning_card")
+                  (.count "id as count")
+                  (.where "next_learn_date" "<" (.getTime (js/Date.)))
+                  (.then (fn [results]
+                           (println (.stringify js/JSON (first results)))
+                           (let [count (:count (js->clj (first results) :keywordize-keys true))]
+                             )))
+                  )
+              )))
 
 (. app (post "/cards/:id/memory"
              (fn [req res] (. res (send "Hello world")))))

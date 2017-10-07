@@ -51,65 +51,60 @@
                      salt (.genSaltSync bcrypt 10)
                      password-hash (.hashSync bcrypt password salt)]
                  (-> (knex "user")
-                      (.insert (clj->js {:email email
-                                         :password password-hash
-                                         :created_at (js/Date.)}))
-                      (.returning "*")
-                      (.then (fn [ids]
-                               (println "signup email:" email (js/Date.))
-                               (.json res (clj->js {:email email})))))
-
+                     (.insert (clj->js {:email email
+                                        :password password-hash
+                                        :created_at (js/Date.)}))
+                     (.returning "*")
+                     (.then (fn [ids]
+                              (println "signup email:" email (js/Date.))
+                              (.json res (clj->js {:email email})))))
                  ))))
 
 (. app (post "/api/cards"
-            (fn [req res]
-              (let [body (.-body req)
-                    front-text (.-front body)
-                    back-text (.-back body)]
-                (-> (knex "card")
-                    (.insert (clj->js {:front_text front-text
-                                       :back_text back-text
-                                       :created_at (js/Date.)}))
-                    (.returning "*")
-                    (.then (fn [results]
-                             (println "post card" front-text)
-                             (.status res 204)
-                             (.send res))))))))
+             (fn [req res]
+               (let [body (.-body req)
+                     front-text (.-front body)
+                     back-text (.-back body)]
+                 (-> (knex "card")
+                     (.insert (clj->js {:front_text front-text
+                                        :back_text back-text
+                                        :created_at (js/Date.)}))
+                     (.returning "*")
+                     (.then (fn [results]
+                              (println "post card" front-text)
+                              (.status res 204)
+                              (.send res))))))))
 
 (. app (get "/api/cards"
             (fn [req res]
-              (-> (knex "learning_card")
-                  (.count "id as count")
-                  (.where "next_learn_date" "<" (.getTime (js/Date.)))
-                  (.then (fn [results]
-                           (let [count (:count (js->clj (first results) :keywordize-keys true))
-                                 max-learn-limit 20
-                                 all-learn-circle 0]
-                             (when (< count 20)
-                               (-> (knex "card")
-                                   (.select "*")
-                                   (.where "learn_time" ">=" (str all-learn-circle))
-                                   (.then (fn [results]
-                                            ()
-                                            (mapv
-                                             (fn [card]
-                                               (-> (knex "learning_card")
-                                                   (.insert (clj->js {:card_id (:id card)
-                                                                      :next_learn_date (cljstime-coerce/to-long (cljstime/today))
-                                                                      :created_at (js/Date.)
-                                                                      }))
-                                                   ))
-                                             (js->clj results :keywordize-keys true))
-                                            ))
-                                   (.then (fn [result]
-                                            (println result)))
-
-                                   )
-                               )
-
-                             )))
-                  )
-              )))
+              (let [max-learn-limit 20
+                    all-learn-circle 0]
+                (-> (knex "learning_card")
+                    (.count "id as count")
+                    (.where "next_learn_date" "<" (.getTime (js/Date.)))
+                    (.then (fn [results]
+                             (let [count (:count (js->clj (first results) :keywordize-keys true))]
+                               (if (< count 20)
+                                 (-> (knex "card")
+                                     (.select "*")
+                                     (.where "learn_time" ">=" (str all-learn-circle))
+                                     (.then (fn [results]
+                                              (js/Promise.all
+                                               (mapv
+                                                (fn [card]
+                                                  (-> (knex "learning_card")
+                                                      (.insert (clj->js {:card_id (:id card)
+                                                                         :next_learn_date (cljstime-coerce/to-long (cljstime/today))
+                                                                         :created_at (js/Date.)}))))
+                                                (js->clj results :keywordize-keys true))))))
+                                 (js/Promise.resolve)))))
+                  (.then (fn []
+                           (-> (knex "learning_card")
+                               (.select "*")
+                               (.where "next_learn_date" "<=" (str (js/Date.)))
+                               (.limit max-learn-limit)
+                               (.then (fn [result]
+                                        (.send res (clj->js result))))))))))))
 
 (. app (post "/cards/:id/memory"
              (fn [req res] (. res (send "Hello world")))))

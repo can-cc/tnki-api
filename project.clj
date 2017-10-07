@@ -10,7 +10,8 @@
                  [fipp "0.6.8"]
                  [markdown-clj "0.9.99"]
                  [io.aviso/pretty "0.1.34"]
-                 [lein-doo "0.1.7"]]
+                 [lein-doo "0.1.7"]
+                 [com.andrewmcveigh/cljs-time "0.5.0"]]
   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
   :jvm-opts ^:replace ["-Xmx1g"]
   :plugins [[lein-npm "0.7.0-rc1"]

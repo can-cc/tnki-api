@@ -1,6 +1,8 @@
 (ns tnki.core
   (:require [cljs.nodejs :as nodejs]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [cljs-time.core :as cljstime]
+            [cljs-time.coerce :as cljstime-coerce]))
 
 (nodejs/enable-util-print!)
 
@@ -80,8 +82,31 @@
                   (.count "id as count")
                   (.where "next_learn_date" "<" (.getTime (js/Date.)))
                   (.then (fn [results]
-                           (println (.stringify js/JSON (first results)))
-                           (let [count (:count (js->clj (first results) :keywordize-keys true))]
+                           (let [count (:count (js->clj (first results) :keywordize-keys true))
+                                 max-learn-limit 20
+                                 all-learn-circle 0]
+                             (when (< count 20)
+                               (-> (knex "card")
+                                   (.select "*")
+                                   (.where "learn_time" ">=" (str all-learn-circle))
+                                   (.then (fn [results]
+                                            ()
+                                            (mapv
+                                             (fn [card]
+                                               (-> (knex "learning_card")
+                                                   (.insert (clj->js {:card_id (:id card)
+                                                                      :next_learn_date (cljstime-coerce/to-long (cljstime/today))
+                                                                      :created_at (js/Date.)
+                                                                      }))
+                                                   ))
+                                             (js->clj results :keywordize-keys true))
+                                            ))
+                                   (.then (fn [result]
+                                            (println result)))
+
+                                   )
+                               )
+
                              )))
                   )
               )))

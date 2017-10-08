@@ -31,10 +31,12 @@
     methods: {
       async signIn (event) {
         event.preventDefault()
-        await axios.post('/api/signin', {
+        const response = await axios.post('/api/signin', {
           email: this.email,
           password: this.password
         })
+        window.localStorage.setItem('jwt', response.headers.jwt)
+        axios.defaults.headers.common['jwt'] = response.headers.jwt
       }
     }
   }

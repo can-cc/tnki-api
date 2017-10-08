@@ -4,6 +4,9 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import Button from './components/widget/Button'
+import axios from 'axios'
+
+axios.defaults.headers.common['jwt'] = window.localStorage.getItem('jwt')
 
 Vue.config.productionTip = false
 Vue.component('Button', Button)

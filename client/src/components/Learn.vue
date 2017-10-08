@@ -2,11 +2,16 @@
   <div class="learn-page">
     <h1>Learn</h1>
 
+    <div v-if="learningCard">
+
+    </div>
+
   </div>
 </template>
 
 <script>
   import axios from 'axios'
+  import router from '@/router/index'
 
   export default {
     name: 'LearnPage',
@@ -22,7 +27,7 @@
       axios.get('/api/cards').then(response => {
         this.cards = response.data
         if (!this.cards.length) {
-
+          router.push('/dash')
         }
         this.learningCard = this.cards[0]
       })

@@ -6,19 +6,39 @@
 
 (nodejs/enable-util-print!)
 
+(def sercet-key "sercet")
+
 (defonce express (nodejs/require "express"))
 (defonce body-parser (nodejs/require "body-parser"))
 (defonce http (nodejs/require "http"))
 (defonce fs (nodejs/require "fs"))
 (defonce path (nodejs/require "path"))
 (defonce bcrypt (nodejs/require "bcryptjs"))
+(defonce jwt (nodejs/require "jsonwebtoken"))
 (def knex ((nodejs/require "knex")
            (clj->js {:client "sqlite3"
                      :connection {:filename "/Users/chchen/Tnki/db.sqlite3"}
                      :useNullAsDefault true})))
 
+
 (def app (express))
 (.use app (.json body-parser))
+
+(defn auth-jwt [req res next]
+  (let [jwt-token (.header req "jwt")]
+    (if (not jwt)
+      (do
+        (.status res 401)
+        (.send res))
+      (.verify jwt jwt-token sercet-key
+               (fn [err decoded]
+                 (if err
+                   (do
+                     (.status res 401)
+                     (.send res))
+                   (let [jwt-data (js->clj decoded :keywordize-keys true)]
+                     (aset req "user" (:user (:data jwt-data)))
+                     (next))))))))
 
 (. app (get "/api/hello"
             (fn [req res] (. res (send "Hello world")))))
@@ -32,14 +52,22 @@
                      (.select "*")
                      (.where (clj->js {:email email}))
                      (.then (fn [results]
-                              (if (not result)
+                              (if (not results)
                                 (do
                                   (.status res 401)
                                   (.send res))
-                                (.compareSync bcrypt password (:password (js->clj (first results) :keywordize-keys true))))
-
-                              )))
-                 ))))
+                                (if (.compareSync bcrypt password (:password (js->clj (first results) :keywordize-keys true)))
+                                  (let [jwt (.sign jwt
+                                                   (clj->js {:data {:user {:email email}}
+                                                             :exp (+ (/ (js/Date.) 1000) (* 300 60 60))})
+                                                   sercet-key
+                                                   )]
+                                    (.header res "jwt" jwt)
+                                    (.send res (clj->js {:email email})))
+                                  (do
+                                    (.status res 401)
+                                    (.send res))
+                                  )))))))))
 
 (. app (post "/api/signup"
              (fn [req res]
@@ -59,21 +87,31 @@
                  ))))
 
 (. app (post "/api/cards"
+             auth-jwt
              (fn [req res]
                (let [body (.-body req)
+                     user (js->clj (.-user req))
                      front-text (.-front body)
                      back-text (.-back body)]
+                 (println (aget req "user"))
                  (-> (knex "card")
                      (.insert (clj->js {:front_text front-text
                                         :back_text back-text
                                         :created_at (js/Date.)}))
                      (.returning "*")
                      (.then (fn [results]
-                              (println "post card" front-text)
-                              (.status res 204)
-                              (.send res))))))))
+                              (-> (knex "user_learn_card")
+                                  (.insert (clj->js {:user_email (:email user)
+                                                     :card_id (first results)
+                                                     :learn_time 0}))
+                                  (.then (fn [results]
+                                           (println "post card" front-text)
+                                           (.status res 204)
+                                           (.send res)))))))
+                 ))))
 
 (. app (get "/api/cards"
+            auth-jwt
             (fn [req res]
               (let [max-learn-limit 20
                     all-learn-circle 0]

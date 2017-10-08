@@ -22,7 +22,9 @@
                        [express "v4.15.5"]
                        [bcryptjs "v2.4.3"]
                        [body-parser "v1.18.2"]
-                       [knex "v0.13.0"]]
+                       [knex "v0.13.0"]
+                       [jsonwebtoken "v8.0.1"]
+                       [sqlite3 "v3.1.13"]]
         :description "tnki"
         :name "tnki",
         :main "out/tnki"

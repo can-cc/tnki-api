@@ -17,7 +17,6 @@
                      :connection {:filename "/Users/chchen/Tnki/db.sqlite3"}
                      :useNullAsDefault true})))
 
-
 (def app (express))
 (.use app (.json body-parser))
 
@@ -29,7 +28,6 @@
                (let [body (.-body req)
                      email (.-email body)
                      password (.-password body)]
-
                  (-> (knex "user")
                      (.select "*")
                      (.where (clj->js {:email email}))
@@ -98,13 +96,13 @@
                                                                          :created_at (js/Date.)}))))
                                                 (js->clj results :keywordize-keys true))))))
                                  (js/Promise.resolve)))))
-                  (.then (fn []
-                           (-> (knex "learning_card")
-                               (.select "*")
-                               (.where "next_learn_date" "<=" (str (js/Date.)))
-                               (.limit max-learn-limit)
-                               (.then (fn [result]
-                                        (.send res (clj->js result))))))))))))
+                    (.then (fn []
+                             (-> (knex "learning_card")
+                                 (.select "*")
+                                 (.where "next_learn_date" "<=" (str (js/Date.)))
+                                 (.limit max-learn-limit)
+                                 (.then (fn [result]
+                                          (.send res (clj->js result))))))))))))
 
 (. app (post "/cards/:id/memory"
              (fn [req res] (. res (send "Hello world")))))

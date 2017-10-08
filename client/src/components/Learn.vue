@@ -13,12 +13,18 @@
     data () {
       return {
         inputFront: '# input card frontend',
-        inputBackend: '## input card backend'
+        inputBackend: '## input card backend',
+        cards: [],
+        learningCard: null
       }
     },
     created () {
       axios.get('/api/cards').then(response => {
-        console.log(response.data)
+        this.cards = response.data
+        if (!this.cards.length) {
+
+        }
+        this.learningCard = this.cards[0]
       })
     },
     methods: {

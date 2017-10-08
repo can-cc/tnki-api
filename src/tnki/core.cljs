@@ -103,7 +103,7 @@
                               (-> (knex "user_learn_card")
                                   (.insert (clj->js {:user_email (:email user)
                                                      :card_id (first results)
-                                                     :learn_time 0}))
+                                                     :learn_time_base 0}))
                                   (.then (fn [results]
                                            (println "post card" front-text)
                                            (.status res 204)
@@ -114,17 +114,25 @@
             auth-jwt
             (fn [req res]
               (let [max-learn-limit 20
-                    all-learn-circle 0]
+                    learn_time_base 0
+                    user (js->clj (.-user req))]
                 (-> (knex "learning_card")
                     (.count "id as count")
+                    (.innerJoin "user_learn_card" "learning_card.card_id" "user_learn_card.card_id")
                     (.where "next_learn_date" "<" (.getTime (js/Date.)))
+                    (.andWhere "learn_time_base" "<=" (str learn_time_base))
+                    (.andWhere "user_email" "=" (:email user))
                     (.then (fn [results]
+                             (println results)
                              (let [count (:count (js->clj (first results) :keywordize-keys true))]
-                               (if (< count 20)
-                                 (-> (knex "card")
+                               (if (< count max-learn-limit)
+                                 (-> (knex "user_learn_card")
                                      (.select "*")
-                                     (.where "learn_time" ">=" (str all-learn-circle))
+                                     (.where "learn_time_base" "<=" (str learn_time_base))
+                                     (.andWhere "email" "=" (:email user))
+                                     (.limit (- max-learn-limit 20))
                                      (.then (fn [results]
+                                              (println results)
                                               (js/Promise.all
                                                (mapv
                                                 (fn [card]
@@ -137,8 +145,10 @@
                     (.then (fn []
                              (-> (knex "learning_card")
                                  (.select "*")
-                                 (.where "next_learn_date" "<=" (str (js/Date.)))
-                                 (.limit max-learn-limit)
+                                 (.innerJoin "user_learn_card" "learning_card.card_id" "user_learn_card.card_id")
+                                 (.where "next_learn_date" "<" (.getTime (js/Date.)))
+                                 (.andWhere "learn_time_base" "<=" (str learn_time_base))
+                                 (.andWhere "user_email" "=" (:email user))
                                  (.then (fn [result]
                                           (.send res (clj->js result))))))))))))
 

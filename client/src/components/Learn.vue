@@ -3,7 +3,7 @@
     <h1>Learn</h1>
 
     <div v-if="learningCard">
-
+      <div>{{learningCard}}</div>
     </div>
 
   </div>

@@ -15,11 +15,11 @@
 (defonce path (nodejs/require "path"))
 (defonce bcrypt (nodejs/require "bcryptjs"))
 (defonce jwt (nodejs/require "jsonwebtoken"))
+(defonce moment (nodejs/require "moment"))
 (def knex ((nodejs/require "knex")
            (clj->js {:client "sqlite3"
                      :connection {:filename "/Users/chchen/Tnki/db.sqlite3"}
                      :useNullAsDefault true})))
-
 
 (def app (express))
 (.use app (.json body-parser))
@@ -60,14 +60,12 @@
                                   (let [jwt (.sign jwt
                                                    (clj->js {:data {:user {:email email}}
                                                              :exp (+ (/ (js/Date.) 1000) (* 300 60 60))})
-                                                   sercet-key
-                                                   )]
+                                                   sercet-key)]
                                     (.header res "jwt" jwt)
                                     (.send res (clj->js {:email email})))
                                   (do
                                     (.status res 401)
-                                    (.send res))
-                                  )))))))))
+                                    (.send res)))))))))))
 
 (. app (post "/api/signup"
              (fn [req res]
@@ -83,8 +81,7 @@
                      (.returning "*")
                      (.then (fn [ids]
                               (println "signup email:" email (js/Date.))
-                              (.json res (clj->js {:email email})))))
-                 ))))
+                              (.json res (clj->js {:email email})))))))))
 
 (. app (post "/api/cards"
              auth-jwt
@@ -107,8 +104,7 @@
                                   (.then (fn [results]
                                            (println "post card" front-text)
                                            (.status res 204)
-                                           (.send res)))))))
-                 ))))
+                                           (.send res)))))))))))
 
 (. app (get "/api/cards"
             auth-jwt
@@ -143,43 +139,58 @@
                                                     (-> (knex "learning_card")
                                                         (.insert (clj->js {:card_id (:card_id card)
                                                                            :next_learn_date (cljstime-coerce/to-long (cljstime/today))
-                                                                           :created_at (js/Date.)})))
-                                                    ]))
+                                                                           :created_at (js/Date.)})))]))
                                                 (js->clj results :keywordize-keys true))))))
                                  (js/Promise.resolve)))))
                     (.then (fn [results]
-                              (-> (knex "learning_card")
-                                  (.select "*")
-                                  (.innerJoin "user_learn_card" "learning_card.card_id" "user_learn_card.card_id")
-                                  (.innerJoin "card" "card.id" "learning_card.card_id")
-                                  (.where "next_learn_date" "<" (.getTime (js/Date.)))
-                                  (.andWhere "user_email" "=" (:email user))
-                                  (.then (fn [result]
-                                           (.send res (clj->js result))))))))))))
+                             (-> (knex "learning_card")
+                                 (.select "*" "learning_card.id as id")
+                                 (.innerJoin "user_learn_card" "learning_card.card_id" "user_learn_card.card_id")
+                                 (.innerJoin "card" "card.id" "learning_card.card_id")
+                                 (.where "next_learn_date" "<" (.getTime (js/Date.)))
+                                 (.andWhere "user_email" "=" (:email user))
+                                 (.then (fn [result]
+                                          (.send res (clj->js result))))))))))))
 
-(. app (post "/cards/:id/memory"
+(. app (post "/api/cards/:id/memory"
              auth-jwt
              (fn [req res]
                (let [body (.-body req)
-                     memory-level (.-memoryLevel body)
+                     params (.-params req)
+                     learning-card-id (str (.-id params))
+                     memory-level (str (.-memoryLevel body))
                      db-memory-level-name (case memory-level
                                             "0" "easy_time"
                                             "1" "remeber_time"
                                             "2" "forget_time"
                                             "forget_time")
-                     next-learn-days (case db-memory-level-name
+                     next-learn-days (case memory-level
                                        "0" 14
                                        "1" 7
                                        "2" 1
                                        1)]
-                 (-> (knex "learning_card" 1)
-                     (.increment db-memory-level-name)
-                     (.update (clj->js {:next_learn_date (cljstime-coerce/to-long (cljstime/plus (cljstime/today) (* 60 * 60 * 60 * 24 * next-learn-days)))}))
+                 (-> (js/Promise.all
+                      [(-> (knex "learning_card")
+                           (.where "id" "=" learning-card-id)
+                           (.increment db-memory-level-name 1)
+                           (.update (clj->js {:next_learn_date (-> (moment)
+                                                                   (.startOf "day" )
+                                                                   (.add next-learn-days "days")
+                                                                   (.valueOf))}))
+                           )
+                       (-> (knex "learning_card")
+                           (.where "id" "=" learning-card-id)
+                           (.increment db-memory-level-name 1))
+                       ])
                      (.then (fn [result]
+                              (.status res 204)
                               (.send res)))
                      )
-                 )
-               )))
+                 ))))
+
+
+(. app (post "/cards/statistics"
+             (fn [req res] (. res (send "Hello world")))))
 
 (. app (post "/cards/export"
              (fn [req res] (. res (send "Hello world")))))

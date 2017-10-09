@@ -47,8 +47,8 @@
     },
     methods: {
       async open (memoryLevel) {
-        await axios.post(`/api/cards/${this.learningCard.card_id}/memory`, {
-          memory_level: memoryLevel
+        await axios.post(`/api/cards/${this.learningCard.id}/memory`, {
+          memoryLevel: memoryLevel
         })
       },
       mark (rawMd) {

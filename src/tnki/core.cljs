@@ -120,40 +120,66 @@
                     (.count "id as count")
                     (.innerJoin "user_learn_card" "learning_card.card_id" "user_learn_card.card_id")
                     (.where "next_learn_date" "<" (.getTime (js/Date.)))
-                    (.andWhere "learn_time_base" "<=" (str learn_time_base))
                     (.andWhere "user_email" "=" (:email user))
                     (.then (fn [results]
-                             (println results)
+                             (println "results="  results)
                              (let [count (:count (js->clj (first results) :keywordize-keys true))]
                                (if (< count max-learn-limit)
                                  (-> (knex "user_learn_card")
                                      (.select "*")
                                      (.where "learn_time_base" "<=" (str learn_time_base))
-                                     (.andWhere "email" "=" (:email user))
-                                     (.limit (- max-learn-limit 20))
+                                     (.andWhere "user_email" "=" (:email user))
+                                     (.limit (- max-learn-limit count))
                                      (.then (fn [results]
-                                              (println results)
+                                              (println "second results=" results)
                                               (js/Promise.all
                                                (mapv
                                                 (fn [card]
-                                                  (-> (knex "learning_card")
-                                                      (.insert (clj->js {:card_id (:id card)
-                                                                         :next_learn_date (cljstime-coerce/to-long (cljstime/today))
-                                                                         :created_at (js/Date.)}))))
+                                                  (js/Promise.all
+                                                   [(-> (knex "user_learn_card")
+                                                        (.where "learn_time_base" "<=" (str learn_time_base))
+                                                        (.andWhere "user_email" "=" (:email user))
+                                                        (.increment "learn_time_base" 1))
+                                                    (-> (knex "learning_card")
+                                                        (.insert (clj->js {:card_id (:card_id card)
+                                                                           :next_learn_date (cljstime-coerce/to-long (cljstime/today))
+                                                                           :created_at (js/Date.)})))
+                                                    ]))
                                                 (js->clj results :keywordize-keys true))))))
                                  (js/Promise.resolve)))))
-                    (.then (fn []
-                             (-> (knex "learning_card")
-                                 (.select "*")
-                                 (.innerJoin "user_learn_card" "learning_card.card_id" "user_learn_card.card_id")
-                                 (.where "next_learn_date" "<" (.getTime (js/Date.)))
-                                 (.andWhere "learn_time_base" "<=" (str learn_time_base))
-                                 (.andWhere "user_email" "=" (:email user))
-                                 (.then (fn [result]
-                                          (.send res (clj->js result))))))))))))
+                    (.then (fn [results]
+                              (-> (knex "learning_card")
+                                  (.select "*")
+                                  (.innerJoin "user_learn_card" "learning_card.card_id" "user_learn_card.card_id")
+                                  (.innerJoin "card" "card.id" "learning_card.card_id")
+                                  (.where "next_learn_date" "<" (.getTime (js/Date.)))
+                                  (.andWhere "user_email" "=" (:email user))
+                                  (.then (fn [result]
+                                           (.send res (clj->js result))))))))))))
 
 (. app (post "/cards/:id/memory"
-             (fn [req res] (. res (send "Hello world")))))
+             auth-jwt
+             (fn [req res]
+               (let [body (.-body req)
+                     memory-level (.-memoryLevel body)
+                     db-memory-level-name (case memory-level
+                                            "0" "easy_time"
+                                            "1" "remeber_time"
+                                            "2" "forget_time"
+                                            "forget_time")
+                     next-learn-days (case db-memory-level-name
+                                       "0" 14
+                                       "1" 7
+                                       "2" 1
+                                       1)]
+                 (-> (knex "learning_card" 1)
+                     (.increment db-memory-level-name)
+                     (.update (clj->js {:next_learn_date (cljstime-coerce/to-long (cljstime/plus (cljstime/today) (* 60 * 60 * 60 * 24 * next-learn-days)))}))
+                     (.then (fn [result]
+                              (.send res)))
+                     )
+                 )
+               )))
 
 (. app (post "/cards/export"
              (fn [req res] (. res (send "Hello world")))))

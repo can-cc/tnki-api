@@ -1,8 +1,9 @@
 <template>
   <div class="dash-page">
-
-    <div>
+    <div class="statistics">
       
+    </div>
+    <div>
       <router-link class="go-learn-button" to="learn">
         <div>Learn</div>
       </router-link>
@@ -22,6 +23,10 @@
         inputBackend: '## input card backend'
       }
     },
+    async created () {
+      const statisticsData = await axios.get('/api/daily/statistics')
+      console.log(statisticsData)
+    },
     methods: {
       async post (event) {
         event.preventDefault()
@@ -37,6 +42,17 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .go-learn-button {
-    
+    display: block;
+    height: 50px;
+    width: 50px;
+    line-height: 45px;
+    background-color: #409EFF;
+    color: white;
+    border-radius: 50%;
+  }
+
+  .go-learn-button div {
+    display: inline-block;
+    vertical-align: middle;
   }
 </style>

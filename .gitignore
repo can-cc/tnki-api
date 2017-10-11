@@ -8,3 +8,4 @@ db.sqlite3
 .nrepl-port
 db.sqlite3
 /.lein-repl-history
+.cljs_rhino_repl/

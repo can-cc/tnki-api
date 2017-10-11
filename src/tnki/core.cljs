@@ -40,8 +40,29 @@
                      (aset req "user" (:user (:data jwt-data)))
                      (next))))))))
 
+(defn insure-today-statistics [req res next]
+  (let [user (.-user req)
+        email (:email user)]
+    (-> (knex "user_daily_statistics")
+        (.count "user_email as count")
+        (.where "user_email" "=" email)
+        (.andWhere "date" "=" (-> (moment)
+                                  (.format "YYYY-MM-DD")))
+        (.then (fn [results]
+                 (if (:count (js->clj (first results) :keywordize-keys true))
+                   (js/Promise.resolve)
+                   (-> (knex "user_daily_statistics")
+                       (.insert (clj->js {:user_email email
+                                          :date (-> (moment)
+                                                    (.format "YYYY-MM-DD"))}))))))
+        (.then next))
+    ))
+
 (. app (get "/api/hello"
-            (fn [req res] (. res (send "Hello world")))))
+            (fn [req res]
+              (println "hello")
+              (.send res "hello world!")
+              )))
 
 (. app (post "/api/signin"
              (fn [req res]
@@ -83,6 +104,22 @@
                               (println "signup email:" email (js/Date.))
                               (.json res (clj->js {:email email})))))))))
 
+(. app (get "/api/daily/statistics"
+           auth-jwt
+           insure-today-statistics
+           (fn [req res]
+             (-> (knex "user_daily_statistics")
+                 (.count "*")
+                 (.where "user_email" "=" email)
+                 (.andWhere "date" "=" (-> (moment)
+                                           (.format "YYYY-MM-DD")))
+                 (.then (fn [results]
+                          (let [statistics-data (first (js->clj results :keywordize-keys true))]
+                            )))
+                 )
+
+             )))
+
 (. app (post "/api/cards"
              auth-jwt
              (fn [req res]
@@ -90,7 +127,6 @@
                      user (js->clj (.-user req))
                      front-text (.-front body)
                      back-text (.-back body)]
-                 (println (aget req "user"))
                  (-> (knex "card")
                      (.insert (clj->js {:front_text front-text
                                         :back_text back-text
@@ -118,7 +154,6 @@
                     (.where "next_learn_date" "<" (.getTime (js/Date.)))
                     (.andWhere "user_email" "=" (:email user))
                     (.then (fn [results]
-                             (println "results="  results)
                              (let [count (:count (js->clj (first results) :keywordize-keys true))]
                                (if (< count max-learn-limit)
                                  (-> (knex "user_learn_card")

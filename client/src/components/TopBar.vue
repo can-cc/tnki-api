@@ -1,8 +1,8 @@
 <template>
 	<div class="container">
-		<div>Learn</div>
-		<img class="logo" alt="" src="../assets/logo.png"/>
-		<div>Profile</div>
+		<router-link class="top-bar-link" to="/home">LEARN</router-link>
+		<img class="logo" alt="logo" src="../assets/logo.png"/>
+		<router-link class="top-bar-link" to="/home">PROFILE</router-link>
 	</div>
 </template>
 
@@ -12,15 +12,28 @@
   }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
- .container {
-	 display: flex;
-	 border-bottom: 1px solid #999;
- }
+  .container {
+	  display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 99;
+    padding: 10px 0px 10px;
+    box-shadow: 0 0 3px #d8d8d8;
+  }
 
- .logo {
-   width: 30px;
-	 height: 30px;
- }
+  .logo {
+    width: 30px;
+	  height: 30px;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #f8f8f8;
+    opacity: 0.95;
+    margin: 0 20px;
+  }
+
+  .top-bar-link {
+    font-weight: 900; 
+    font-family: "SourceCodePro";
+  }
 </style>

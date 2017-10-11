@@ -1,8 +1,16 @@
 <template>
   <div class="dash-page">
     <div class="statistics">
-      
+      <div v-for="item in [{name: 'Learned', key: 'learn_time'}, {name: 'Need learn', key: 'need_learn_count'}, {name: 'All Finish', key: 'all_finish'}]" class="statistics-grid">
+        <div class="name">
+          {{item.name}}
+        </div>
+        <div class="value">
+          {{statisticsData ? statisticsData[item.key] : '-'}}
+        </div>
+      </div>
     </div>
+
     <div>
       <router-link class="go-learn-button" to="learn">
         <div>Learn</div>
@@ -19,13 +27,12 @@
     name: 'DashPage',
     data () {
       return {
-        inputFront: '# input card frontend',
-        inputBackend: '## input card backend'
+        statisticsData: null
       }
     },
     async created () {
       const statisticsData = await axios.get('/api/daily/statistics')
-      console.log(statisticsData)
+      this.statisticsData = statisticsData.data
     },
     methods: {
       async post (event) {
@@ -54,5 +61,9 @@
   .go-learn-button div {
     display: inline-block;
     vertical-align: middle;
+  }
+
+  .statistics {
+    display: flex;
   }
 </style>

@@ -1,8 +1,12 @@
 (ns tnki.core
-  (:require [cljs.nodejs :as nodejs]
+  (:require [tnki.dao :as dao]
+            [cljs.core.async :as async]
+            [cljs.nodejs :as nodejs]
             [clojure.string :as string]
             [cljs-time.core :as cljstime]
-            [cljs-time.coerce :as cljstime-coerce]))
+            [cljs-time.coerce :as cljstime-coerce])
+  (:require-macros
+   [cljs.core.async.macros :refer [go go-loop]]))
 
 (nodejs/enable-util-print!)
 
@@ -108,17 +112,19 @@
            auth-jwt
            insure-today-statistics
            (fn [req res]
-             (-> (knex "user_daily_statistics")
-                 (.count "*")
-                 (.where "user_email" "=" email)
-                 (.andWhere "date" "=" (-> (moment)
-                                           (.format "YYYY-MM-DD")))
-                 (.then (fn [results]
-                          (let [statistics-data (first (js->clj results :keywordize-keys true))]
-                            )))
-                 )
-
-             )))
+             (go
+               (let [user (.-user req)
+                     email (:email user)
+                     all-finish (async/<! (dao/get-all-finish-card-count-chan user))
+                     total-days (async/<! (dao/get-user-total-learn-days-chan user))
+                     need-learn-card (async/<! (dao/get-user-need-learning-card-count user))
+                     statistics-table-data (async/<! (dao/get-user-daily-statistics user))
+                     statistics-data (merge need-learn-card
+                                            total-days
+                                            all-finish
+                                            statistics-table-data)]
+                 (.send res (clj->js statistics-data))
+                 )))))
 
 (. app (post "/api/cards"
              auth-jwt

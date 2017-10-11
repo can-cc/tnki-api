@@ -2,17 +2,22 @@
   <div class="learn-page">
     <h1>Learn</h1>
 
-    <div class="card-container" v-if="learningCard">
-      <div v-html="mark(learningCard.front_text)"></div>
+    <div class="card-container" v-if="cards[0]">
+      <div v-html="mark(cards[0].front_text)"></div>
+
+      <div v-if="learningOpen">
+        <hr/>
+        <div v-html="mark(cards[0].back_text)"></div>
+      </div>
 
       <div class="operation" v-if="!learningOpen">
-        <div v-on:click="open(0)">Too Easy</div>
-        <div v-on:click="open(1)">Remeber</div>
-        <div v-on:click="open(2)">Forgot</div>
+        <div v-on:click="show()">Show Back</div>
       </div>
 
       <div class="operation__open" v-if="learningOpen">
-        <div v-on:click="open(0)">Next</div>
+        <div v-on:click="open(0)">Too Easy</div>
+        <div v-on:click="open(1)">Remeber</div>
+        <div v-on:click="open(2)">Forgot</div>
       </div>
 
     </div>
@@ -24,6 +29,7 @@
   import axios from 'axios'
   import router from '@/router/index'
   import marked from 'marked'
+  import fp from 'lodash/fp'
 
   export default {
     name: 'LearnPage',
@@ -32,7 +38,6 @@
         inputFront: '# input card frontend',
         inputBackend: '## input card backend',
         cards: [],
-        learningCard: null,
         learningOpen: false
       }
     },
@@ -40,16 +45,23 @@
       axios.get('/api/cards').then(response => {
         this.cards = response.data
         if (!this.cards.length) {
-          router.push('/dash')
+          return router.push('/learn-complete')
         }
-        this.learningCard = this.cards[0]
       })
     },
     methods: {
       async open (memoryLevel) {
-        await axios.post(`/api/cards/${this.learningCard.id}/memory`, {
+        await axios.post(`/api/cards/${this.cards[0].id}/memory`, {
           memoryLevel: memoryLevel
         })
+        if (!this.cards.length) {
+          return router.push('/learn-complete')
+        }
+        this.cards = fp.drop(1, this.cards)
+        this.learningOpen = false
+      },
+      show () {
+        this.learningOpen = true
       },
       mark (rawMd) {
         return marked(rawMd, { sanitize: true })
@@ -61,10 +73,10 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .card-container {
-    display: inline-block;
     padding: 20px;
     box-shadow: 0 0 10px #999;
     border-radius: 4px;
+    transition: all 300ms ease-in-out;
   }
 
   .operation__open, .operation {
@@ -75,6 +87,7 @@
   .operation__open > div, .operation > div {
     cursor: pointer;
     padding: 3px 10px;
+    border-radius: 3px;
   }
 
   .operation__open  > div:hover, .operation > div:hover {

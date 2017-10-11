@@ -6,6 +6,7 @@ import Hello from '@/components/Hello'
 import Post from '@/components/Post'
 import Dash from '@/components/Dash'
 import Learn from '@/components/Learn'
+import LearnComplete from '@/components/LearnComplete'
 
 Vue.use(Router)
 
@@ -33,7 +34,7 @@ export default new Router({
       component: Post
     },
     {
-      path: '/dash',
+      path: '/home',
       name: 'Dash',
       component: Dash
     },
@@ -41,6 +42,11 @@ export default new Router({
       path: '/learn',
       name: 'Learn',
       component: Learn
+    },
+    {
+      path: '/learn-complete',
+      name: 'LearnComplete',
+      component: LearnComplete
     }
   ]
 })

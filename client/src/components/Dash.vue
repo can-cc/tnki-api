@@ -1,6 +1,12 @@
 <template>
   <div class="dash-page">
 
+    <div>
+      
+      <router-link class="go-learn-button" to="learn">
+        <div>Learn</div>
+      </router-link>
+    </div>
 
   </div>
 </template>
@@ -30,5 +36,7 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+  .go-learn-button {
+    
+  }
 </style>

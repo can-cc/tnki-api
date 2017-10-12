@@ -50,12 +50,14 @@
 <style scoped>
   .go-learn-button {
     display: block;
-    height: 50px;
-    width: 50px;
-    line-height: 45px;
+    height: 80px;
+    width: 80px;
+    line-height: 80px;
     background-color: #409EFF;
     color: white;
     border-radius: 50%;
+    font-size: 1.7rem;
+    font-weight: 700;
   }
 
   .go-learn-button div {

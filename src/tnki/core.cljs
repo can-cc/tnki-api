@@ -64,7 +64,6 @@
 
 (. app (get "/api/hello"
             (fn [req res]
-              (println "hello")
               (.send res "hello world!")
               )))
 
@@ -144,7 +143,7 @@
                                                      :card_id (first results)
                                                      :learn_time_base 0}))
                                   (.then (fn [results]
-                                           (println "post card" front-text)
+                                           (println "post card" front-text (js/Date.))
                                            (.status res 204)
                                            (.send res)))))))))))
 
@@ -168,7 +167,6 @@
                                      (.andWhere "user_email" "=" (:email user))
                                      (.limit (- max-learn-limit count))
                                      (.then (fn [results]
-                                              (println "second results=" results)
                                               (js/Promise.all
                                                (mapv
                                                 (fn [card]

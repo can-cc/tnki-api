@@ -18,6 +18,13 @@
       </router-link>
     </div>
 
+    <div class="post-link-container">
+      <router-link to="/post">
+        <i class="el-icon-d-arrow-right"></i>
+        add new card
+      </router-link>
+    </div>
+
   </div>
 </template>
 
@@ -107,5 +114,17 @@
 
   .total-days-container .el-icon-date {
     color: #409EFF;
+  }
+
+  .post-link-container {
+    margin-top: 15px;
+  }
+  .post-link-container a {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .post-link-container .el-icon-d-arrow-right {
+    font-size: 10px;
+    margin-left: -4px;
   }
 </style>

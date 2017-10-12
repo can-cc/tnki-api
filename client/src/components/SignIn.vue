@@ -17,11 +17,11 @@
         </label>
       </div>
 
-      <div class="signin-button-container">
-        <el-button native-type="submi" type="primary" plain>Sign In</el-button>
+      <div class="button-container">
+        <el-button native-type="submit" type="primary" plain>Sign In</el-button>
       </div>
 
-      <div class="signup-tip">
+      <div class="tip">
         Do not have account? <router-link to="/signup">Sign Up</router-link>
       </div>
 
@@ -52,7 +52,7 @@
           window.localStorage.setItem('jwt', response.headers.jwt)
           axios.defaults.headers.common['jwt'] = response.headers.jwt
           this.$message({
-            message: 'Login sccuess!',
+            message: 'Sign in sccuess!',
             type: 'success'
           })
           router.push('/home')
@@ -98,17 +98,19 @@
     display: inline-block;
     width: 110px;
     text-align: left;
+    color: #409EFF;
+    font-weight: bolder;
   }
 
-  .signup-tip {
+  .tip {
     margin-top: 10px;
   }
 
-  .signup-tip a {
+  .tip a {
     color: #409EFE
   }
 
-  .signin-button-container {
+  .button-container {
     margin-top: 10px;
   }
 </style>

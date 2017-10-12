@@ -57,12 +57,14 @@
     background-color: #409EFF;
     color: white;
     border-radius: 50%;
-    font-size: 1.7rem;
+    font-size: 1.5rem;
     font-weight: 700;
+    border: 5px solid #4a9de0;
+    margin: 30px auto 0;
   }
 
   .go-learn-button div {
-    display: inline-block;
+    display: block;
     vertical-align: middle;
   }
 
@@ -75,6 +77,7 @@
     font-size: 1.5rem;
     letter-spacing: 2px;
     line-height: 1rem;
+    color: #EB9E05;
   }
   .statistics-grid .name {
     font-weight: 300;
@@ -87,13 +90,14 @@
   }
 
   .total-days-container {
-    
+    margin: 30px;
   }
 
   .total-days-container .day-number {
     font-weight: 900;
     font-size: 4rem;
     color: #67C23A;
+    margin-left: 58px;
   }
 
   .total-days-container .day-text {

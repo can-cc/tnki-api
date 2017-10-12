@@ -1,6 +1,7 @@
 <template>
   <div class="signup-page">
-    <div>Sign Up</div>
+    <h1>Tnki</h1>
+    <h2>Sign Up</h2>
     <form v-on:submit="signUp($event)">
       <div class="form-item">
         <label>
@@ -16,15 +17,20 @@
         </label>
       </div>
 
-
       <div class="form-item">
         <label>
           <span>Repeat Password</span>
-          <el-input v-model="repeatPassword" name="tnki-repeat-password" type="password" placeholder="Repeat Password" minlenght="6"></el-input>
+          <el-input v-model="repeatPassword" name="tnki-repeat-password" type="password" placeholder="Repeat Password" minlength="6"></el-input>
         </label>
       </div>
 
-      <button type="submit">SignUp</button>
+      <div class="button-container">
+        <el-button native-type="submit" type="primary" plain>Sign Up</el-button>
+      </div>
+
+      <div class="tip">
+        Already have an account? <router-link to="/signin">Sign In</router-link>
+      </div>
 
     </form>
   </div>
@@ -32,6 +38,7 @@
 
 <script>
   import axios from 'axios'
+  import router from '@/router'
 
   export default {
     name: 'SignUpPage',
@@ -39,23 +46,28 @@
       return {
         password: '',
         email: '',
-        repeatPassword: '',
-        errorMessage: null
+        repeatPassword: ''
       }
     },
     methods: {
       async signUp (event) {
-        event.preventDefault()
-        this.errorMessage = null
-        if (this.password !== this.repeatPassword) {
-          this.errorMessage = 'Password not match!'
-          return
+        try {
+          event.preventDefault()
+          if (this.password !== this.repeatPassword) {
+            return this.$message.error('Password not match!')
+          }
+          await axios.post('/api/signup', {
+            email: this.email,
+            password: this.password
+          })
+          this.$message({
+            message: 'Sign up sccuess! Please sign in',
+            type: 'success'
+          })
+          router.push('/signin')
+        } catch (error) {
+          this.$message.error('Sign up unknown error.')
         }
-
-        await axios.post('/api/signup', {
-          email: this.email,
-          password: this.password
-        })
       }
     }
   }
@@ -64,7 +76,12 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   h1, h2 {
-    font-weight: normal;
+    color: #409EFF;
+    font-family: "Verdana";
+  }
+
+  h2 {
+    margin-top: -1.5rem;
   }
 
   form {
@@ -84,6 +101,19 @@
     display: inline-block;
     width: 110px;
     text-align: left;
+    color: #409EFF;
+    font-weight: bolder;
   }
 
+  .button-container {
+    margin-top: 10px;
+  }
+
+  .tip {
+    margin-top: 10px;
+  }
+
+  .tip a {
+    color: #409EFE
+  }
 </style>

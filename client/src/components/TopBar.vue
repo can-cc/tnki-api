@@ -19,8 +19,9 @@
     align-items: center;
     position: relative;
     z-index: 99;
-    padding: 10px 0px 10px;
-    box-shadow: 0 0 3px #d8d8d8;
+    padding: 5px 0px 5px;
+    box-shadow: 0 0 3px #e8e8e8;
+    padding-left: 10px;
   }
 
   .logo {

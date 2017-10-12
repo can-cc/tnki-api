@@ -22,7 +22,7 @@
 (defonce moment (nodejs/require "moment"))
 (def knex ((nodejs/require "knex")
            (clj->js {:client "sqlite3"
-                     :connection {:filename "/Users/chchen/Tnki/db.sqlite3"}
+                     :connection {:filename "./db.sqlite3"}
                      :useNullAsDefault true})))
 
 (def app (express))
@@ -59,8 +59,7 @@
                        (.insert (clj->js {:user_email email
                                           :date (-> (moment)
                                                     (.format "YYYY-MM-DD"))}))))))
-        (.then (fn []
-                 (next))))
+        (.then #(next)))
     ))
 
 (. app (get "/api/hello"
@@ -229,16 +228,6 @@
                               (.send res)))
                      )
                  ))))
-
-
-(. app (post "/cards/statistics"
-             (fn [req res] (. res (send "Hello world")))))
-
-(. app (post "/cards/export"
-             (fn [req res] (. res (send "Hello world")))))
-
-(. app (post "/cards/inport"
-             (fn [req res] (. res (send "Hello world")))))
 
 (defn -main [& args]
   (doto (.createServer http #(app %1 %2))

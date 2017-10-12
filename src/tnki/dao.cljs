@@ -10,7 +10,7 @@
 (defonce moment (nodejs/require "moment"))
 (def knex ((nodejs/require "knex")
            (clj->js {:client "sqlite3"
-                     :connection {:filename "/Users/chchen/Tnki/db.sqlite3"}
+                     :connection {:filename "./db.sqlite3"}
                      :useNullAsDefault true})))
 
 (defn get-all-finish-card-count-chan [user]
@@ -29,10 +29,8 @@
     (-> (knex "user_daily_statistics")
         (.count "user_email as count")
         (.where "user_email" "=" (:email user))
-        (.andWhere "date" "=" (-> (moment)
-                                  (.format "YYYY-MM-DD")))
         (.then (fn [results]
-                 (go (async/>! out {:total_days (:count (js->clj (first results) :keywordize-keys))}))))
+                 (go (async/>! out {:total_days (:count (js->clj (first results) :keywordize-keys true))}))))
         )
     out
     ))

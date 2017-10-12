@@ -2,26 +2,27 @@
   <div class="signup-page">
     <div>Sign Up</div>
     <form v-on:submit="signUp($event)">
-      <div>
-        <label for="">Email</label>
-        <input v-model="email" name="email" type="email" value=""/>
+      <div class="form-item">
+        <label>
+          <span>Email</span>
+          <el-input v-model="email" name="tnki-email" type="email" placeholder="Email"></el-input>
+        </label>
       </div>
 
-      <div>
-        <label for="">Password</label>
-        <input v-model="password" minlength="6" name="password" type="password" value=""/>
+      <div class="form-item">
+        <label>
+          <span>Password</span>
+          <el-input v-model="password" name="tnki-password" type="password" placeholder="Password" minlength="6"></el-input>
+        </label>
       </div>
 
 
-      <div>
-        <label for="">Repeat Password</label>
-        <input v-model="repeatPassword" minlenght="6" name="repeat-password" type="password" value=""/>
+      <div class="form-item">
+        <label>
+          <span>Repeat Password</span>
+          <el-input v-model="repeatPassword" name="tnki-repeat-password" type="password" placeholder="Repeat Password" minlenght="6"></el-input>
+        </label>
       </div>
-
-      <div class="error-message">
-        {{errorMessage}}
-      </div>
-
 
       <button type="submit">SignUp</button>
 
@@ -66,17 +67,23 @@
     font-weight: normal;
   }
 
-  ul {
-    list-style-type: none;
-    padding: 0;
+  form {
+    padding: 0 10px;
   }
 
-  li {
+  .form-item {
+    margin-bottom: 10px;
+  }
+
+  .form-item label {
+    display: flex;
+    align-items: center;
+  }
+
+  .form-item span {
     display: inline-block;
-    margin: 0 10px;
+    width: 110px;
+    text-align: left;
   }
 
-  a {
-    color: #42b983;
-  }
 </style>

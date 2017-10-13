@@ -233,8 +233,8 @@
     (.listen 3000))
   (doto (.createServer https (clj->js
                               {:key (.readFileSync fs "/etc/letsencrypt/live/tnki.octopuese.xyz/privkey.pem")
-                               :cert (.readFileSync fs "/etc/letsencrypt/live/tnki.octopuese.xyz/cert.pem")}
-                              app))
+                               :cert (.readFileSync fs "/etc/letsencrypt/live/tnki.octopuese.xyz/cert.pem")})
+                       app)
     (.listen 3001)) 
   (println "server listen on http://localhost:3000"))
 

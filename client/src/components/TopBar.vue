@@ -1,8 +1,15 @@
 <template>
 	<div class="container">
-		<router-link class="top-bar-link" to="/home">LEARN</router-link>
+    <div>
+		  <router-link class="top-bar-link" to="/home">LEARN</router-link>
+    </div>
 		<img class="logo" alt="logo" src="../assets/logo.png"/>
-		<router-link class="top-bar-link" to="/home">PROFILE</router-link>
+    <div>
+		  <router-link class="top-bar-link" to="/home">PROFILE</router-link>
+      <router-link class="post-link" to="/post">
+        <i class="el-icon-edit"></i>
+      </router-link>
+    </div>
 	</div>
 </template>
 
@@ -21,7 +28,15 @@
     z-index: 99;
     padding: 5px 0px 5px;
     box-shadow: 0 0 3px #e8e8e8;
-    padding-left: 10px;
+  }
+
+  .container > div {
+    width: 170px;
+    height: 28px;
+    line-height: 28px;
+    position: relative;
+    text-align: center;
+    overflow: hidden;
   }
 
   .logo {
@@ -34,7 +49,26 @@
   }
 
   .top-bar-link {
-    font-weight: 900; 
+    font-weight: 900;
     font-family: "SourceCodePro";
+  }
+
+  .post-link {
+    display: block;
+    height: 16px;
+    width: 16px;
+    float: right;
+    position: relative;
+    top: 3.5px;
+    left: -8px;
+    color: #409EFF;
+    border: 2px solid #409EFF;
+    border-radius: 50%;
+    padding: 1px;
+  }
+  .post-link i {
+    position: absolute;
+    top: 1px;
+    left: 1px;
   }
 </style>

@@ -7,7 +7,7 @@ import axios from 'axios'
 
 import 'element-ui/lib/theme-chalk/index.css'
 import './style/element-reset.css'
-import { Button, Input, Message } from 'element-ui'
+import { Button, Input, Message, Card } from 'element-ui'
 
 axios.defaults.headers.common['jwt'] = window.localStorage.getItem('jwt')
 axios.interceptors.response.use(function (response) {
@@ -20,9 +20,9 @@ axios.interceptors.response.use(function (response) {
 })
 
 Vue.config.productionTip = false
-Vue.component('Button', Button)
 Vue.component(Button.name, Button)
 Vue.component(Input.name, Input)
+Vue.use(Card)
 Vue.prototype.$message = Message
 
 /* eslint-disable no-new */

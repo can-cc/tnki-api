@@ -1,34 +1,46 @@
 <template>
   <div class="post-page">
 
+    <h1>
+      <i class="el-icon-edit"></i>
+      Add Card:
+    </h1>
+
     <form v-on:submit="post($event)">
       <div class="post-input">
-        <h2>
-          Front:
-        </h2>
         <div>
 
         </div>
-        <div class="input-area">
-          <textarea :value="inputFront" @input="updateFront"></textarea>
-          <div class="input-preview" v-html="compiledFrontMarkdown"></div>
-        </div>
+
+        <el-card :body-style="{padding: '0'}">
+          <h2>
+            Front:
+            <small>(markdown)</small>
+          </h2>
+          <div class="input-area">
+            <codemirror v-model="inputFront" @input="updateFront" :options="editorOptions"></codemirror>
+            <div class="input-preview" v-html="compiledFrontMarkdown"></div>
+          </div>
+        </el-card>
+
+        <el-card :body-style="{padding: '0'}">
+          <h2>
+            Front:
+            <small>(markdown)</small>
+          </h2>
+          <div class="input-area">
+            <textarea :value="inputBackend" @input="updateBackend"></textarea>
+            <div class="input-preview" v-html="compiledBackendMarkdown"></div>
+          </div>
+        </el-card>
+
       </div>
 
-      <div class="post-input">
-        <h2>
-          Backend:
-        </h2>
-        <div class="input-area">
-          <textarea :value="inputBackend" @input="updateBackend"></textarea>
-          <div class="input-preview" v-html="compiledBackendMarkdown"></div>
-        </div>
+
+      <div class="button-container">
+        <el-button native-type="submit" type="primary" plain>Add Card</el-button>
       </div>
 
-
-      <div>
-        <Button type="submit">Post</Button>
-      </div>
     </form>
   </div>
 </template>
@@ -37,18 +49,40 @@
   import marked from 'marked'
   import _ from 'lodash'
   import axios from 'axios'
+  import { codemirror } from 'vue-codemirror'
+  import 'highlight.js/styles/brown-paper.css'
+
+  function mark (md) {
+    return marked(md, {
+      sanitize: true,
+      gfm: true,
+      highlight: function (code) {
+        return require('highlight.js').highlightAuto(code).value
+      }
+    })
+  }
 
   export default {
     name: 'PostPage',
+    components: {codemirror},
     data () {
       return {
-        inputFront: '# input card frontend',
-        inputBackend: '## input card backend'
+        inputFront: '',
+        inputBackend: '',
+        frontMarkdown: '',
+        editorOptions: {
+          mode: 'text/x-markdown',
+          theme: 'base16-light',
+          lineNumbers: false,
+          matchBrackets: true,
+          lineWrapping: true,
+          extraKeys: {'Enter': 'newlineAndIndentContinueMarkdownList'}
+        }
       }
     },
     computed: {
       compiledFrontMarkdown: function () {
-        return marked(this.inputFront, { sanitize: true })
+        return mark(this.frontMarkdown)
       },
       compiledBackendMarkdown: function () {
         return marked(this.inputBackend, { sanitize: true })
@@ -63,10 +97,10 @@
         })
       },
       updateFront: _.debounce(function (e) {
-        this.inputFront = e.target.value
+        this.frontMarkdown = e
       }, 300),
       updateBackend: _.debounce(function (e) {
-        this.inputBackend = e.target.value
+        this.inputBackend = e
       }, 300)
     }
   }
@@ -74,20 +108,35 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  .post-input {
+  h1 {
+    text-align: left;
+    color: #409EFF;
+    margin: 20px 0 0 5px;
+    font-size: 1.3rem;
+  }
 
+  h2 {
+    text-align: left;
+    color: #409EFF;
+    margin: 0 0 0 5px;
+    font-size: 1.2rem;
+  }
+
+  .el-card {
+    margin-top: 20px;
   }
 
   .input-area {
     display: flex;
     position: relative;
-    background-color: #e8e8e8;
+    background-color: #edfcff;
     overflow: hidden;
-    border: 1px solid #e8e8e8;
     height: 250px;
     max-width: 800px;
     margin: 0 auto;
     border-radius: 2px;
+    color: #2D2F33;
+    text-align: left;
   }
 
   .input-area textarea {
@@ -102,9 +151,30 @@
 
   .input-preview {
     box-sizing: border-box;
-    padding-left: 10px;
+    padding: 0 10px;
     width: 50%;
-    font-size: 12px;
+    font-size: 13px;
     text-align: left;
+    line-height: 1;
+    overflow: auto;
+  }
+
+  .button-container {
+    margin-top: 20px;
+    padding-left: 10px;
+    text-align: left;
+    padding-bottom: 50px;
+  }
+
+</style>
+<style>
+  .post-page .CodeMirror {
+    width: 50%;
+    height: 100%;
+  }
+  .post-page .input-preview pre {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 5px;
   }
 </style>

@@ -47,7 +47,7 @@
       }
     },
     created () {
-      axios.get('/api/daily/statistics').then(response => {
+      axios.get(`/api/daily/statistics?timestamp=${new Date().getTime()}`).then(response => {
         this.statisticsData = response.data
       })
       jsonp('http://open.iciba.com/dsapi/', null, (err, data) => {
@@ -92,11 +92,11 @@
 
   .statistics {
     display: flex;
-    padding: 0 0 10px;
+    padding: 10px 0 10px;
   }
 
   .total-days-container {
-    margin: 30px;
+    margin: 30px auto 10px;
   }
 
   .total-days-container .day-number {

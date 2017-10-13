@@ -50,7 +50,7 @@
 
   .top-bar-link {
     font-weight: 900;
-    font-family: "SourceCodePro";
+    font-family: "HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
   }
 
   .post-link {

@@ -28,7 +28,6 @@
     height: 2px;
     line-height: 0;
     page-break-after: always;
-    text-align: center;
     width: 80%;
   }
 

@@ -1,7 +1,7 @@
 <template>
   <div class="signin-page">
     <h1>Tnki</h1>
-    <h2>Sign In</h2>
+    <h2>       - Sign In</h2>
     <form v-on:submit="signIn($event)">
       <div class="form-item">
         <label>
@@ -79,6 +79,7 @@
 
   h2 {
     margin-top: -1.5rem;
+    white-space: pre;
   }
 
   form {

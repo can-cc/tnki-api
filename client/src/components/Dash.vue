@@ -47,10 +47,11 @@
       }
     },
     created () {
+      console.log(process)
       axios.get(`/api/daily/statistics?timestamp=${new Date().getTime()}`).then(response => {
         this.statisticsData = response.data
       })
-      jsonp('http://open.iciba.com/dsapi/', null, (err, data) => {
+      jsonp(`${process.env.production ? 'https' : 'http'}://open.iciba.com/dsapi/`, null, (err, data) => {
         if (data) {
           this.ds = data
         }

@@ -15,6 +15,7 @@
 (defonce express (nodejs/require "express"))
 (defonce body-parser (nodejs/require "body-parser"))
 (defonce http (nodejs/require "http"))
+(defonce https (nodejs/require "https"))
 (defonce fs (nodejs/require "fs"))
 (defonce path (nodejs/require "path"))
 (defonce bcrypt (nodejs/require "bcryptjs"))
@@ -230,6 +231,11 @@
 (defn -main [& args]
   (doto (.createServer http #(app %1 %2))
     (.listen 3000))
+  (doto (.createServer https (clj->js
+                              {:key (.readFileSync fs "/etc/letsencrypt/live/tnki.octopuese.xyz/privkey.pem")
+                               :cert (.readFileSync fs "/etc/letsencrypt/live/tnki.octopuese.xyz/cert.pem")}
+                              app))
+    (.listen 3001)) 
   (println "server listen on http://localhost:3000"))
 
 (set! *main-cli-fn* -main)

@@ -29,7 +29,7 @@
             <small>(markdown)</small>
           </h2>
           <div class="input-area">
-            <textarea :value="inputBackend" @input="updateBackend"></textarea>
+            <codemirror v-model="inputBackend" @input="updateBackend" :options="editorOptions"></codemirror>
             <div class="input-preview" v-html="compiledBackendMarkdown"></div>
           </div>
         </el-card>
@@ -70,6 +70,7 @@
         inputFront: '',
         inputBackend: '',
         frontMarkdown: '',
+        backendMarkdown: '',
         editorOptions: {
           mode: 'text/x-markdown',
           theme: 'base16-light',
@@ -85,22 +86,38 @@
         return mark(this.frontMarkdown)
       },
       compiledBackendMarkdown: function () {
-        return marked(this.inputBackend, { sanitize: true })
+        return mark(this.backendMarkdown)
       }
     },
     methods: {
+      reset () {
+        this.inputFront = ''
+        this.inputBackend = ''
+        this.frontMarkdown = ''
+        this.backendMarkdown = ''
+      },
       async post (event) {
         event.preventDefault()
-        await axios.post('/api/cards', {
-          front: this.inputFront,
-          back: this.inputBackend
-        })
+        if (!this.inputFront.trim() || !this.inputBackend.trim()) {
+          return this.$message.warning('Please fill card front and back.')
+        }
+        try {
+          event.preventDefault()
+          await axios.post('/api/cards', {
+            front: this.inputFront,
+            back: this.inputBackend
+          })
+          this.$message.success('Add card successful!')
+          this.reset()
+        } catch (error) {
+          this.$message.error('Add card unknown error.')
+        }
       },
       updateFront: _.debounce(function (e) {
         this.frontMarkdown = e
       }, 300),
       updateBackend: _.debounce(function (e) {
-        this.inputBackend = e
+        this.backendMarkdown = e
       }, 300)
     }
   }
@@ -108,6 +125,12 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+  @media (min-width: 600px) {
+    .post-page {
+      padding: 0 20px;
+    }
+  }
+
   h1 {
     text-align: left;
     color: #409EFF;

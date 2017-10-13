@@ -70,6 +70,9 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+  .el-card {
+    margin: 10px;
+  }
 
   .statistics-grid {
     width: 100%;

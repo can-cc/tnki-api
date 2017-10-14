@@ -19,7 +19,7 @@
         (.count "id as count")
         (.innerJoin "user_learn_card" "learning_card.card_id" "user_learn_card.card_id")
         (.where "user_email" "=" (:email user))
-        (.where "learn_time_base" ">" 0)
+        (.where "learn_time_base" ">" 1)
         (.then (fn [results]
                  (go (async/>! out {:all_finish (:count (js->clj (first results) :keywordize-keys true))})))))
     out))

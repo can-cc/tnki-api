@@ -5,6 +5,11 @@ CREATE TABLE user (
        learn_time_base INTEGER DEFAULT 0
 );
 
+CREATE TABLE user_learn_data (
+       email TEXT NOT NULL,
+       learn_base_time NOT NULL DEFAULT 1
+);
+
 CREATE TABLE card (
        id INTEGER PRIMARY KEY AUTOINCREMENT,
        front_text TEXT NOT NULL,

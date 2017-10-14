@@ -3,21 +3,12 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import axios from 'axios'
+
+import '@/service/setup-axios'
 
 import 'element-ui/lib/theme-chalk/index.css'
 import './style/element-reset.css'
 import { Button, Input, Message, Card } from 'element-ui'
-
-axios.defaults.headers.common['jwt'] = window.localStorage.getItem('jwt')
-axios.interceptors.response.use(function (response) {
-  return response
-}, function (error) {
-  if (error.response.status === 401) {
-    router.push('/signin')
-  }
-  return Promise.reject(error)
-})
 
 Vue.config.productionTip = false
 Vue.component(Button.name, Button)

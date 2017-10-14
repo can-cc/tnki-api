@@ -1,12 +1,13 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import SignIn from '@/components/SignIn'
-import SignUp from '@/components/SignUp'
-import Home from '@/components/Home'
-import Post from '@/components/Post'
-import Dash from '@/components/Dash'
-import Learn from '@/components/Learn'
-import LearnComplete from '@/components/LearnComplete'
+
+const Post = () => import(/* webpackChunkName: "post" */'@/components/Post')
+const Home = () => import(/* webpackChunkName: "home" */'@/components/Home')
+const Dash = () => import(/* webpackChunkName: "dash" */'@/components/Dash')
+const Learn = () => import(/* webpackChunkName: "dash" */'@/components/Learn')
+const LearnComplete = () => import(/* webpackChunkName: "learn-complete" */'@/components/LearnComplete')
+const SignIn = () => import(/* webpackChunkName: "sign-in" */'@/components/SignIn')
+const SignUp = () => import(/* webpackChunkName: "sign-up" */'@/components/SignUp')
 
 Vue.use(Router)
 

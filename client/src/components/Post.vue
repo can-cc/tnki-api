@@ -25,7 +25,7 @@
 
         <el-card :body-style="{padding: '0'}">
           <h2>
-            Front:
+            Back:
             <small>(markdown)</small>
           </h2>
           <div class="input-area">

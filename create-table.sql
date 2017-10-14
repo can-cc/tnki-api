@@ -9,7 +9,7 @@ CREATE TABLE card (
        id INTEGER PRIMARY KEY AUTOINCREMENT,
        front_text TEXT NOT NULL,
        back_text TEXT NOT NULL,
-       audio TEXT
+       audio TEXT,
        created_at TEXT
 );
 

@@ -50,7 +50,7 @@
       axios.get(`/api/daily/statistics?timestamp=${new Date().getTime()}`).then(response => {
         this.statisticsData = response.data
       })
-      jsonp(`${process.env.NODE_ENV.production ? 'https' : 'http'}://open.iciba.com/dsapi/`, null, (err, data) => {
+      jsonp(`${process.env.NODE_ENV === 'production' ? 'https' : 'http'}://open.iciba.com/dsapi/`, null, (err, data) => {
         if (data) {
           this.ds = data
         }

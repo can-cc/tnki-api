@@ -109,6 +109,7 @@
     margin: 0 0 10px 0;
     padding: 5px;
     font-size: 12px;
+    overflow: auto;
   }
   .text-container-label {
     color: #409EFF;

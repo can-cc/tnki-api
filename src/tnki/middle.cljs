@@ -22,7 +22,7 @@
       (-> (if (< need-learn-card-count max-learn-limit)
             (-> (knex "user_learn_card")
                 (.select "*")
-                (.where "learn_time_base" "<=" (str learn_time_base))
+                (.where "learn_time_base" "<=" (str learn-time-base))
                 (.andWhere "user_email" "=" (:email user))
                 (.limit (- max-learn-limit need-learn-card-count))
                 (.then (fn [results]
@@ -33,6 +33,7 @@
                               [(-> (knex "user_learn_card")
                                    (.where "learn_time_base" "<=" (str learn_time_base))
                                    (.andWhere "user_email" "=" (:email user))
+                                   (.andWhere "card_id" "=" (:card_id card))
                                    (.increment "learn_time_base" 1))
                                (-> (knex "learning_card")
                                    (.insert (clj->js {:card_id (:card_id card)

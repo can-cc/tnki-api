@@ -112,6 +112,7 @@
 (. app (get "/api/daily/statistics"
            auth-jwt
            insure-today-statistics
+           middle/check-pull-card-to-learn
            (fn [req res]
              (go
                (let [user (.-user req)
@@ -170,6 +171,7 @@
              auth-jwt
              (fn [req res]
                (let [body (.-body req)
+                     user (.-user req)
                      params (.-params req)
                      learning-card-id (str (.-id params))
                      memory-level (str (.-memoryLevel body))
@@ -194,6 +196,16 @@
                            )
                        (-> (knex "learning_card")
                            (.where "id" "=" learning-card-id)
+                           (.increment db-memory-level-name 1))
+                       (-> (knex "user_daily_statistics")
+                           (.where "user_email" (:email user))
+                           (.andWhere "date" "=" (-> (moment)
+                                                     (.format "YYYY-MM-DD")))
+                           (.increment "learn_time" 1))
+                       (-> (knex "user_daily_statistics")
+                           (.where "user_email" (:email user))
+                           (.andWhere "date" "=" (-> (moment)
+                                                     (.format "YYYY-MM-DD")))
                            (.increment db-memory-level-name 1))
                        ])
                      (.then (fn [result]

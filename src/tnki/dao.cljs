@@ -30,10 +30,8 @@
         (.count "user_email as count")
         (.where "user_email" "=" (:email user))
         (.then (fn [results]
-                 (go (async/>! out {:total_days (:count (js->clj (first results) :keywordize-keys true))}))))
-        )
-    out
-    ))
+                 (go (async/>! out {:total_days (:count (js->clj (first results) :keywordize-keys true))})))))
+    out))
 
 (defn get-user-need-learning-card-count [user]
   (let [out (async/chan 1)]
@@ -44,10 +42,8 @@
         (.where "next_learn_date" "<" (.getTime (js/Date.)))
         (.andWhere "user_email" "=" (:email user))
         (.then (fn [results]
-                 (go (async/>! out (:count (js->clj (first results) :keywordize-keys true))))
-                )))
-    out
-    ))
+                 (go (async/>! out (:count (js->clj (first results) :keywordize-keys true)))))))
+    out))
 
 (defn get-user-daily-statistics [user]
   (let [out (async/chan 1)]
@@ -57,6 +53,5 @@
         (.andWhere "date" "=" (-> (moment)
                                   (.format "YYYY-MM-DD")))
         (.then (fn [results]
-                 (go (async/>! out (first (js->clj results :keywordize-keys true))))
-                 )))
+                 (go (async/>! out (first (js->clj results :keywordize-keys true)))))))
     out))

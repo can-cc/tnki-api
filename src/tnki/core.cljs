@@ -1,5 +1,6 @@
 (ns tnki.core
   (:require [tnki.dao :as dao]
+            [tnki.middle :as middle]
             [cljs.core.async :as async]
             [cljs.nodejs :as nodejs]
             [clojure.string :as string]
@@ -117,7 +118,7 @@
                      email (:email user)
                      all-finish (async/<! (dao/get-all-finish-card-count-chan user))
                      total-days (async/<! (dao/get-user-total-learn-days-chan user))
-                     need-learn-card (async/<! (dao/get-user-need-learning-card-count user))
+                     need-learn-card {:need_learn_count (async/<! (dao/get-user-need-learning-card-count user))}
                      statistics-table-data (async/<! (dao/get-user-daily-statistics user))
                      statistics-data (merge need-learn-card
                                             total-days
@@ -150,47 +151,20 @@
 
 (. app (get "/api/cards"
             auth-jwt
+            middle/check-pull-card-to-learn
             (fn [req res]
               (let [max-learn-limit 20
                     learn_time_base 0
                     user (js->clj (.-user req))]
                 (-> (knex "learning_card")
-                    (.count "id as count")
+                    (.select "*" "learning_card.id as id")
                     (.innerJoin "user_learn_card" "learning_card.card_id" "user_learn_card.card_id")
+                    (.innerJoin "card" "card.id" "learning_card.card_id")
                     (.where "next_learn_date" "<" (.getTime (js/Date.)))
                     (.andWhere "user_email" "=" (:email user))
-                    (.then (fn [results]
-                             (let [count (:count (js->clj (first results) :keywordize-keys true))]
-                               (if (< count max-learn-limit)
-                                 (-> (knex "user_learn_card")
-                                     (.select "*")
-                                     (.where "learn_time_base" "<=" (str learn_time_base))
-                                     (.andWhere "user_email" "=" (:email user))
-                                     (.limit (- max-learn-limit count))
-                                     (.then (fn [results]
-                                              (js/Promise.all
-                                               (mapv
-                                                (fn [card]
-                                                  (js/Promise.all
-                                                   [(-> (knex "user_learn_card")
-                                                        (.where "learn_time_base" "<=" (str learn_time_base))
-                                                        (.andWhere "user_email" "=" (:email user))
-                                                        (.increment "learn_time_base" 1))
-                                                    (-> (knex "learning_card")
-                                                        (.insert (clj->js {:card_id (:card_id card)
-                                                                           :next_learn_date (cljstime-coerce/to-long (cljstime/today))
-                                                                           :created_at (js/Date.)})))]))
-                                                (js->clj results :keywordize-keys true))))))
-                                 (js/Promise.resolve)))))
-                    (.then (fn [results]
-                             (-> (knex "learning_card")
-                                 (.select "*" "learning_card.id as id")
-                                 (.innerJoin "user_learn_card" "learning_card.card_id" "user_learn_card.card_id")
-                                 (.innerJoin "card" "card.id" "learning_card.card_id")
-                                 (.where "next_learn_date" "<" (.getTime (js/Date.)))
-                                 (.andWhere "user_email" "=" (:email user))
-                                 (.then (fn [result]
-                                          (.send res (clj->js result))))))))))))
+                    (.then (fn [result]
+                             (.send res (clj->js result)))))
+                ))))
 
 (. app (post "/api/cards/:id/memory"
              auth-jwt

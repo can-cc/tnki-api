@@ -44,7 +44,7 @@
         (.where "next_learn_date" "<" (.getTime (js/Date.)))
         (.andWhere "user_email" "=" (:email user))
         (.then (fn [results]
-                 (go (async/>! out {:need_learn_count (:count (js->clj (first results) :keywordize-keys true))}))
+                 (go (async/>! out (:count (js->clj (first results) :keywordize-keys true))))
                 )))
     out
     ))

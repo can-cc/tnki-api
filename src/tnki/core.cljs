@@ -66,8 +66,7 @@
 
 (. app (get "/api/hello"
             (fn [req res]
-              (.send res "hello world!")
-              )))
+              (.send res "hello world!"))))
 
 (. app (post "/api/signin"
              (fn [req res]

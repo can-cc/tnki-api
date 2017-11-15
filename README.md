@@ -1,4 +1,5 @@
 # Tnki
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 FIXME: Write a one-line description of your library/project.
 

@@ -220,7 +220,7 @@
                               {:key (.readFileSync fs "/etc/letsencrypt/live/tnki.octopuese.xyz/privkey.pem")
                                :cert (.readFileSync fs "/etc/letsencrypt/live/tnki.octopuese.xyz/cert.pem")})
                        app)
-    (.listen 3001 "127.0.0.1")) 
+    (.listen 3001 "127.0.0.1"))
   (println "server listen on http://localhost:3000"))
 
 (set! *main-cli-fn* -main)

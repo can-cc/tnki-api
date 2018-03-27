@@ -1,0 +1,14 @@
+{
+  "root": true,
+  "extends": [
+    "plugin:vue/essential",
+    "@vue/prettier",
+    "@vue/typescript"
+  ],
+  "rules": {
+    "prettier/prettier": ["error", {
+      "singleQuote": true,
+      "printWidth": 100
+    }]
+  }
+}

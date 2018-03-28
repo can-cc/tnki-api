@@ -1,8 +1,9 @@
 CREATE TABLE user (
-       email TEXT NOT NULL PRIMARY KEY,
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+       email TEXT NOT NULL UNIQUE,
        password TEXT NOT NULL,
        created_at TEXT,
-       learn_time_base INTEGER DEFAULT 0
+       -- learn_time_base INTEGER DEFAULT 0
 );
 
 CREATE TABLE user_learn_data (
@@ -13,7 +14,9 @@ CREATE TABLE user_learn_data (
 CREATE TABLE card (
        id INTEGER PRIMARY KEY AUTOINCREMENT,
        front_text TEXT NOT NULL,
+       front_image TEXT,
        back_text TEXT NOT NULL,
+       back_iamge,
        audio TEXT,
        created_at TEXT
 );

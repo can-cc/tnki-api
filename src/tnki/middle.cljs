@@ -3,11 +3,13 @@
             [cljs.core.async :as async]
             [cljs.nodejs :as nodejs]
             [tnki.dao :as dao]
+            [tnki.auth :as auth]
             [cljs-time.core :as cljstime]
             [cljs-time.coerce :as cljstime-coerce])
   (:require-macros
    [cljs.core.async.macros :refer [go go-loop]]))
 
+(defonce jwt (nodejs/require "jsonwebtoken"))
 (def knex ((nodejs/require "knex")
            (clj->js {:client "sqlite3"
                      :connection {:filename "./db.sqlite3"}
@@ -44,4 +46,21 @@
           (.then (fn [results]
                    (next))))
       )))
+
+(defn auth-jwt [req res next]
+  (let [jwt-token (.header req "jwt")]
+    (if (not jwt-token)
+      (do
+        (.status res 401)
+        (.send res))
+      (.verify jwt jwt-token auth/sercet-key
+               (fn [err decoded]
+                 (if err
+                   (do
+                     (println err)
+                     (.status res 401)
+                     (.send res))
+                   (let [jwt-data (js->clj decoded :keywordize-keys true)]
+                     (aset req "user" (:user (:data jwt-data)))
+                     (next))))))))
 

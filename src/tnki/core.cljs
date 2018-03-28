@@ -1,6 +1,8 @@
 (ns tnki.core
   (:require [tnki.dao :as dao]
             [tnki.middle :as middle]
+            [tnki.auth :as auth]
+            [tnki.router.auth :as router-auth]
             [cljs.core.async :as async]
             [cljs.nodejs :as nodejs]
             [clojure.string :as string]
@@ -11,8 +13,6 @@
 
 (nodejs/enable-util-print!)
 
-(def sercet-key "sercet")
-
 (defonce express (nodejs/require "express"))
 (defonce body-parser (nodejs/require "body-parser"))
 (defonce http (nodejs/require "http"))
@@ -20,7 +20,6 @@
 (defonce fs (nodejs/require "fs"))
 (defonce path (nodejs/require "path"))
 (defonce bcrypt (nodejs/require "bcryptjs"))
-(defonce jwt (nodejs/require "jsonwebtoken"))
 (defonce moment (nodejs/require "moment"))
 (def knex ((nodejs/require "knex")
            (clj->js {:client "sqlite3"
@@ -30,22 +29,7 @@
 (def app (express))
 (.use app (.json body-parser))
 
-(defn auth-jwt [req res next]
-  (let [jwt-token (.header req "jwt")]
-    (if (not jwt)
-      (do
-        (.status res 401)
-        (.send res))
-      (.verify jwt jwt-token sercet-key
-               (fn [err decoded]
-                 (if err
-                   (do
-                     (.status res 401)
-                     (.send res))
-                   (let [jwt-data (js->clj decoded :keywordize-keys true)]
-                     (aset req "user" (:user (:data jwt-data)))
-                     (next))))))))
-
+;; TODO move
 (defn insure-today-statistics [req res next]
   (let [user (.-user req)
         email (:email user)]
@@ -64,71 +48,34 @@
         (.then #(next)))
     ))
 
+
+
 (. app (get "/api/hello"
             (fn [req res]
               (.send res "hello world!"))))
 
-(. app (post "/api/signin"
-             (fn [req res]
-               (let [body (.-body req)
-                     email (.-email body)
-                     password (.-password body)]
-                 (-> (knex "user")
-                     (.select "*")
-                     (.where (clj->js {:email email}))
-                     (.then (fn [results]
-                              (if (not results)
-                                (do
-                                  (.status res 401)
-                                  (.send res))
-                                (if (.compareSync bcrypt password (:password (js->clj (first results) :keywordize-keys true)))
-                                  (let [jwt (.sign jwt
-                                                   (clj->js {:data {:user {:email email}}
-                                                             :exp (+ (/ (js/Date.) 1000) (* 300 60 60))})
-                                                   sercet-key)]
-                                    (.header res "jwt" jwt)
-                                    (.send res (clj->js {:email email})))
-                                  (do
-                                    (.status res 401)
-                                    (.send res)))))))))))
-
-(. app (post "/api/signup"
-             (fn [req res]
-               (let [body (.-body req)
-                     email (.-email body)
-                     password (.-password body)
-                     salt (.genSaltSync bcrypt 10)
-                     password-hash (.hashSync bcrypt password salt)]
-                 (-> (knex "user")
-                     (.insert (clj->js {:email email
-                                        :password password-hash
-                                        :created_at (js/Date.)}))
-                     (.returning "*")
-                     (.then (fn [ids]
-                              (println "signup email:" email (js/Date.))
-                              (.json res (clj->js {:email email})))))))))
 
 (. app (get "/api/daily/statistics"
-           auth-jwt
-           insure-today-statistics
-           middle/check-pull-card-to-learn
-           (fn [req res]
-             (go
-               (let [user (.-user req)
-                     email (:email user)
-                     all-finish (async/<! (dao/get-all-finish-card-count-chan user))
-                     total-days (async/<! (dao/get-user-total-learn-days-chan user))
-                     need-learn-card {:need_learn_count (async/<! (dao/get-user-need-learning-card-count user))}
-                     statistics-table-data (async/<! (dao/get-user-daily-statistics user))
-                     statistics-data (merge need-learn-card
-                                            total-days
-                                            all-finish
-                                            statistics-table-data)]
-                 (.send res (clj->js statistics-data))
-                 )))))
+            middle/auth-jwt
+            insure-today-statistics
+            middle/check-pull-card-to-learn
+            (fn [req res]
+              (go
+                (let [user (.-user req)
+                      email (:email user)
+                      all-finish (async/<! (dao/get-all-finish-card-count-chan user))
+                      total-days (async/<! (dao/get-user-total-learn-days-chan user))
+                      need-learn-card {:need_learn_count (async/<! (dao/get-user-need-learning-card-count user))}
+                      statistics-table-data (async/<! (dao/get-user-daily-statistics user))
+                      statistics-data (merge need-learn-card
+                                             total-days
+                                             all-finish
+                                             statistics-table-data)]
+                  (.send res (clj->js statistics-data))
+                  )))))
 
 (. app (post "/api/cards"
-             auth-jwt
+             middle/auth-jwt
              (fn [req res]
                (let [body (.-body req)
                      user (js->clj (.-user req))
@@ -149,42 +96,52 @@
                                            (.status res 204)
                                            (.send res)))))))))))
 
-(. app (get "/api/cards/:userId"
-            auth-jwt
+(. app (get "/api/cards/user/:userId/learn"
+            middle/auth-jwt
             middle/check-pull-card-to-learn
             (fn [req res]
-              (let [
+              (let [params (.-params req)
                     user-id (str (.-userId params))
                     user (js->clj (.-user req))]
-                (-> (knex "learning_card")
-                    (.select "*" "learning_card.id as id")
-                    (.innerJoin "user_learn_card" "learning_card.card_id" "user_learn_card.card_id")
-                    (.innerJoin "card" "card.id" "learning_card.card_id")
-                    (.where "next_learn_date" "<" (.getTime (js/Date.)))
-                    (.andWhere "user_email" "=" (:email user))
-                    (.then (fn [result]
-                             (.send res (clj->js result)))))
+                (if (not (== user-id (str (:id user))))
+                  (-> res
+                      (.status 401)
+                      (.send))
+                  (-> (knex "card")
+                      (.select "*")
+                      (.innerJoin "user_learn_card" "user_learn_card.card_id" "card.id")
+                      (.where "user_learn_card.user_email" "=" (:email user))
+                      (.then (fn [result]
+                               (.send res (clj->js result)))))
+                  )
                 ))))
 
-(. app (get "/api/cards/learn"
-            auth-jwt
+(. app (get "/api/cards/user/:userId/learn/today"
+            middle/auth-jwt
             middle/check-pull-card-to-learn
             (fn [req res]
               (let [max-learn-limit 20
                     learn_time_base 0
+                    params (.-params req)
+                    user-id (str (.-userId params))
                     user (js->clj (.-user req))]
-                (-> (knex "learning_card")
-                    (.select "*" "learning_card.id as id")
-                    (.innerJoin "user_learn_card" "learning_card.card_id" "user_learn_card.card_id")
-                    (.innerJoin "card" "card.id" "learning_card.card_id")
-                    (.where "next_learn_date" "<" (.getTime (js/Date.)))
-                    (.andWhere "user_email" "=" (:email user))
-                    (.then (fn [result]
-                             (.send res (clj->js result)))))
+                (if (not (== user-id (str (:id user))))
+                  (-> res
+                      (.status 401)
+                      (.send))
+                  (-> (knex "learning_card")
+                      (.select "*" "learning_card.id as id")
+                      (.innerJoin "user_learn_card" "learning_card.card_id" "user_learn_card.card_id")
+                      (.innerJoin "card" "card.id" "learning_card.card_id")
+                      (.where "next_learn_date" "<" (.getTime (js/Date.)))
+                      (.andWhere "user_email" "=" (:email user))
+                      (.then (fn [result]
+                               (.send res (clj->js result)))))
+                  )
                 ))))
 
 (. app (post "/api/cards/:id/memory"
-             auth-jwt
+             middle/auth-jwt
              (fn [req res]
                (let [body (.-body req)
                      user (.-user req)
@@ -218,7 +175,7 @@
                            (.andWhere "date" "=" (-> (moment)
                                                      (.format "YYYY-MM-DD")))
                            (.increment "learn_time" 1))
-                      (-> (knex "user_daily_statistics")
+                       (-> (knex "user_daily_statistics")
                            (.where "user_email" (:email user))
                            (.andWhere "date" "=" (-> (moment)
                                                      (.format "YYYY-MM-DD")))
@@ -229,6 +186,9 @@
                               (.send res)))
                      )
                  ))))
+
+(.use app router-auth/router)
+
 
 (defn -main [& args]
   (doto (.createServer http #(app %1 %2))

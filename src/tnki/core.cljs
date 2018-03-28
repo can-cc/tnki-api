@@ -149,7 +149,24 @@
                                            (.status res 204)
                                            (.send res)))))))))))
 
-(. app (get "/api/cards"
+(. app (get "/api/cards/:userId"
+            auth-jwt
+            middle/check-pull-card-to-learn
+            (fn [req res]
+              (let [
+                    user-id (str (.-userId params))
+                    user (js->clj (.-user req))]
+                (-> (knex "learning_card")
+                    (.select "*" "learning_card.id as id")
+                    (.innerJoin "user_learn_card" "learning_card.card_id" "user_learn_card.card_id")
+                    (.innerJoin "card" "card.id" "learning_card.card_id")
+                    (.where "next_learn_date" "<" (.getTime (js/Date.)))
+                    (.andWhere "user_email" "=" (:email user))
+                    (.then (fn [result]
+                             (.send res (clj->js result)))))
+                ))))
+
+(. app (get "/api/cards/learn"
             auth-jwt
             middle/check-pull-card-to-learn
             (fn [req res]
@@ -201,7 +218,7 @@
                            (.andWhere "date" "=" (-> (moment)
                                                      (.format "YYYY-MM-DD")))
                            (.increment "learn_time" 1))
-                       (-> (knex "user_daily_statistics")
+                      (-> (knex "user_daily_statistics")
                            (.where "user_email" (:email user))
                            (.andWhere "date" "=" (-> (moment)
                                                      (.format "YYYY-MM-DD")))

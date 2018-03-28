@@ -24,7 +24,7 @@
                        [body-parser "v1.18.2"]
                        [knex "v0.13.0"]
                        [jsonwebtoken "v8.0.1"]
-                       [sqlite3 "v3.1.13"]
+                       [sqlite3 "v4.0.0"]
                        [moment "v2.19.3"]]
         :description "tnki"
         :name "tnki",

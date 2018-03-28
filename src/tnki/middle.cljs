@@ -10,6 +10,7 @@
    [cljs.core.async.macros :refer [go go-loop]]))
 
 (defonce jwt (nodejs/require "jsonwebtoken"))
+(defonce moment (nodejs/require "moment"))
 (def knex ((nodejs/require "knex")
            (clj->js {:client "sqlite3"
                      :connection {:filename "./db.sqlite3"}
@@ -64,3 +65,20 @@
                      (aset req "user" (:user (:data jwt-data)))
                      (next))))))))
 
+(defn insure-today-statistics [req res next]
+  (let [user (.-user req)
+        email (:email user)]
+    (-> (knex "user_daily_statistics")
+        (.count "user_email as count")
+        (.where "user_email" "=" email)
+        (.andWhere "date" "=" (-> (moment)
+                                  (.format "YYYY-MM-DD")))
+        (.then (fn [results]
+                 (if (> (:count (js->clj (first results) :keywordize-keys true)) 0) 
+                   (js/Promise.resolve)
+                   (-> (knex "user_daily_statistics")
+                       (.insert (clj->js {:user_email email
+                                          :date (-> (moment)
+                                                    (.format "YYYY-MM-DD"))}))))))
+        (.then #(next)))
+    ))

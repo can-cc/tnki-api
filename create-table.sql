@@ -16,9 +16,9 @@ CREATE TABLE card (
        front_text TEXT NOT NULL,
        front_image TEXT,
        back_text TEXT NOT NULL,
-       back_iamge,
+       back_iamge TEXT,
        audio TEXT,
-       created_at TEXT
+       created_at Date
 );
 
 CREATE TABLE learning_card (
@@ -27,9 +27,9 @@ CREATE TABLE learning_card (
        easy_time INTEGER DEFAULT 0,
        remeber_time INTEGER DEFAULT 0,
        forget_time INTEGER DEFAULT 0,
-       next_learn_date TEXT,
-       created_at TEXT,
-       update_at TEXT
+       next_learn_date Date,
+       created_at Date,
+       update_at Date
 );
 
 CREATE TABLE user_learn_card (
@@ -41,7 +41,7 @@ CREATE TABLE user_learn_card (
 
 CREATE TABLE user_daily_statistics (
        user_email TEXT NOT NULL,
-       date TEXT NOT NULL,
+       date Date NOT NULL,
        learn_time INTEGER DEFAULT 0,
        easy_time INTEGER DEFAULT 0,
        remeber_time INTEGER DEFAULT 0,

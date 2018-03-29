@@ -4,6 +4,7 @@
             [tnki.auth :as auth]
             [tnki.router.auth :as router-auth]
             [tnki.router.card :as router-card]
+            [tnki.router.file :as router-file]
             [cljs.core.async :as async]
             [cljs.nodejs :as nodejs]
             [clojure.string :as string]
@@ -54,10 +55,9 @@
                   (.send res (clj->js statistics-data))
                   )))))
 
-
 (.use app router-auth/router)
 (.use app router-card/router)
-
+(.use app router-file/router)
 
 (defn -main [& args]
   (doto (.createServer http #(app %1 %2))

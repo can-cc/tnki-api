@@ -23,8 +23,10 @@
                        [bcryptjs "v2.4.3"]
                        [body-parser "v1.18.2"]
                        [knex "v0.13.0"]
+                       [multer "v1.3.0"]
                        [jsonwebtoken "v8.0.1"]
                        [sqlite3 "v4.0.0"]
+                       [camelcase-keys "v4.2.0"]
                        [moment "v2.19.3"]]
         :description "tnki"
         :name "tnki",

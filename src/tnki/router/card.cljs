@@ -14,6 +14,7 @@
 
 (defonce express (nodejs/require "express"))
 (defonce moment (nodejs/require "moment"))
+(defonce camelcase-keys (nodejs/require "camelcase-keys"))
 (def knex ((nodejs/require "knex")
            (clj->js {:client "sqlite3"
                      :connection {:filename "./db.sqlite3"}
@@ -60,7 +61,7 @@
                       (.innerJoin "user_learn_card" "user_learn_card.card_id" "card.id")
                       (.where "user_learn_card.user_email" "=" (:email user))
                       (.then (fn [result]
-                               (.send res (clj->js result)))))
+                               (.send res (camelcase-keys (clj->js result))))))
                   )
                 ))))
 
@@ -81,7 +82,7 @@
                          (.innerJoin "learning_card" "learning_card.card_id" "card.id")
                          (.where "user_learn_card.user_email" "=" (:email user))
                          (.then (fn [result]
-                                  (.send res (clj->js result)))))
+                                  (.send res (camelcase-keys (clj->js result))))))
                      )
                    ))))
 
@@ -106,7 +107,7 @@
                       (.where "next_learn_date" "<" (.getTime (js/Date.)))
                       (.andWhere "user_email" "=" (:email user))
                       (.then (fn [result]
-                               (.send res (clj->js result)))))
+                               (.send res (camelcase-keys (clj->js result))))))
                   )
                 ))))
 

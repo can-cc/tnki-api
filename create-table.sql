@@ -16,7 +16,7 @@ CREATE TABLE card (
        front_text TEXT NOT NULL,
        front_image TEXT,
        back_text TEXT NOT NULL,
-       back_iamge TEXT,
+       back_image TEXT,
        audio TEXT,
        created_at Date
 );

@@ -14,13 +14,15 @@
 (defonce express (nodejs/require "express"))
 (defonce multer (nodejs/require "multer"))
 
-(def upload (multer (clj->js {:dest "uploads/"})))
-
 (def router (.Router express))
+
+(def upload (multer (clj->js {:dest "uploads-image/"})))
+(.use router "/image" (.static express "uploads-image/"))
 
 (. router (post "/api/image"
                 (.single upload "image")
                 (fn [req res]
-                  (let [file (.-file req)]
-                    (.send res (clj->js {:file file})))
+                  (let [file (.-file req)
+                        filename (.-filename file)]
+                    (.send res (clj->js {:filename filename})))
                   )))

@@ -28,11 +28,15 @@
              (fn [req res]
                (let [body (.-body req)
                      user (js->clj (.-user req))
-                     front-text (.-front body)
-                     back-text (.-back body)]
+                     front-text (.-frontText body)
+                     back-text (.-backText body)
+                     front-image (.-frontImage body)
+                     back-image (.-backImage body)]
                  (-> (knex "card")
                      (.insert (clj->js {:front_text front-text
+                                        :front_image front-image
                                         :back_text back-text
+                                        :back_image back-image
                                         :created_at (js/Date.)}))
                      (.returning "*")
                      (.then (fn [results]
@@ -47,7 +51,6 @@
 
 (. router (get "/api/cards/user/:userId"
             middle/auth-jwt
-            middle/check-pull-card-to-learn
             (fn [req res]
               (let [params (.-params req)
                     user-id (str (.-userId params))
@@ -67,7 +70,6 @@
 
 (. router (get "/api/cards/user/:userId/learning"
                middle/auth-jwt
-               middle/check-pull-card-to-learn
                (fn [req res]
                  (let [params (.-params req)
                        user-id (str (.-userId params))
@@ -89,7 +91,6 @@
 
 (. router (get "/api/cards/user/:userId/learn/today"
             middle/auth-jwt
-            middle/check-pull-card-to-learn
             (fn [req res]
               (let [max-learn-limit 20
                     learn_time_base 0

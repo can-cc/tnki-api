@@ -11,3 +11,4 @@ db.sqlite3
 .cljs_rhino_repl/
 /db.sqlite3-journal
 /uploads/
+/uploads-image/

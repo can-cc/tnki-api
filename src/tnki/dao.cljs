@@ -66,7 +66,16 @@
         (.where "user_email" "=" (:email user))
         (.andWhere "date" "=" yestoday-str)
         (.then (fn [results]
-                 (go (async/>! out (first (js->clj results :keywordize-keys true))))))
+                 (go (async/>! out (or (first (js->clj results :keywordize-keys true)) {})))))
         )
     out))
+
+(defn record-today-statistics-continuous-days [days]
+  (-> (knex "user_daily_statistics")
+      (.andWhere "date" "=" (-> (moment)
+                                (.format "YYYY-MM-DD")))
+      (.update (clj->js {:continuous_days
+                         (str days)
+                         }))
+      (.then)))
 

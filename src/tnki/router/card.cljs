@@ -8,7 +8,9 @@
             [clojure.string :as string]
             [cljs-time.core :as cljstime]
             [cljs-time.coerce :as cljstime-coerce])
-  )
+    (:require-macros
+     [cljs.core.async.macros :refer [go go-loop]])
+    )
 
 
 (nodejs/enable-util-print!)
@@ -71,6 +73,7 @@
 
 (. router (get "/api/cards/user/:userId/learning"
                middle/auth-jwt
+               middle/insure-today-statistics
                (fn [req res]
                  (let [params (.-params req)
                        user-id (str (.-userId params))
@@ -91,6 +94,7 @@
 
 (. router (get "/api/cards/user/:userId/learn/today"
             middle/auth-jwt
+            middle/insure-today-statistics
             (fn [req res]
               (let [max-learn-limit 20
                     learn_time_base 0
@@ -112,7 +116,8 @@
                                (util/handle-today-finish user)
                                (.send res (camelcase-keys (clj->js result))))))
                   )
-                ))))
+                )
+              )))
 
 (. router (post "/api/cards/:id/memory"
              middle/auth-jwt

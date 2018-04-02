@@ -54,6 +54,7 @@
 
 (. router (get "/api/cards/user/:userId"
             middle/auth-jwt
+            middle/check-pull-card-to-learn
             (fn [req res]
               (let [params (.-params req)
                     user-id (str (.-userId params))
@@ -74,6 +75,7 @@
 (. router (get "/api/cards/user/:userId/learning"
                middle/auth-jwt
                middle/insure-today-statistics
+               middle/check-pull-card-to-learn
                (fn [req res]
                  (let [params (.-params req)
                        user-id (str (.-userId params))
@@ -95,6 +97,7 @@
 (. router (get "/api/cards/user/:userId/learn/today"
             middle/auth-jwt
             middle/insure-today-statistics
+            middle/check-pull-card-to-learn
             (fn [req res]
               (let [max-learn-limit 20
                     learn_time_base 0
@@ -112,8 +115,6 @@
                       (.where "next_learn_date" "<" (.getTime (js/Date.)))
                       (.andWhere "user_email" "=" (:email user))
                       (.then (fn [result]
-                               (let [count (.-length result)])
-                               (util/handle-today-finish user)
                                (.send res (camelcase-keys (clj->js result))))))
                   )
                 )
@@ -158,6 +159,12 @@
                            (.increment db-memory-level-name 1))
                        ])
                      (.then (fn [result]
+                              (go
+                                (let [today-should-learn-card-count (async/<! (dao/get-today-should-learn-card-count user))]
+                                  (if (= 0 today-should-learn-card-count)
+                                    (util/handle-today-finish user)))
+                                )
+
                               (.status res 204)
                               (.send res)))
                      )

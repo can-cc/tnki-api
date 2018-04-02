@@ -70,6 +70,23 @@
         )
     out))
 
+(defn get-today-should-learn-card-count [user]
+  (let [out (async/chan 1)]
+    (-> (knex "learning_card")
+        (.count "* as count")
+        (.innerJoin "user_learn_card" "learning_card.card_id" "user_learn_card.card_id")
+        (.innerJoin "card" "card.id" "learning_card.card_id")
+        (.where "next_learn_date" "<" (.getTime (js/Date.)))
+        (.andWhere "user_email" "=" (:email user))
+        (.then (fn [results]
+                 (go (async/>! out (:count (first (js->clj results :keywordize-keys true)))))
+                 )
+               )
+        )
+    out
+    )
+  )
+
 (defn record-today-statistics-continuous-days [days]
   (-> (knex "user_daily_statistics")
       (.andWhere "date" "=" (-> (moment)

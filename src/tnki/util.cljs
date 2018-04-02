@@ -9,16 +9,11 @@
   (let [out (async/chan 1)]
     (go
       (let [yestoday-statistics (async/<! (dao/get-yestoday-statistics user))]
-        (async/>! out (or (:continuous_days yestoday-statistics) 0))
-
-        ))
-    out)
-  )
+        (async/>! out (or (:continuous_days yestoday-statistics) 0))))
+    out))
 
 (defn handle-today-finish [user]
   (go
+    (println (:email user) "finish today learn card")
     (let [has-continuous-days (async/<! (get-has-continuous-days user))]
-      (dao/record-today-statistics-continuous-days (inc has-continuous-days))
-      )
-    )
-  )
+      (dao/record-today-statistics-continuous-days (inc has-continuous-days)))))

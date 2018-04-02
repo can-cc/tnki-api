@@ -40,6 +40,7 @@
 (. app (get "/api/daily/statistics"
             middle/auth-jwt
             middle/insure-today-statistics
+            middle/check-pull-card-to-learn
             (fn [req res]
               (go
                 (let [user (.-user req)

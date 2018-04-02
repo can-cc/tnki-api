@@ -2,6 +2,7 @@
   (:require [tnki.dao :as dao]
             [tnki.middle :as middle]
             [tnki.auth :as auth]
+            [tnki.util :as util]
             [tnki.router.auth :as router-auth]
             [tnki.router.card :as router-card]
             [tnki.router.file :as router-file]
@@ -39,7 +40,6 @@
 (. app (get "/api/daily/statistics"
             middle/auth-jwt
             middle/insure-today-statistics
-            middle/check-pull-card-to-learn
             (fn [req res]
               (go
                 (let [user (.-user req)
@@ -48,6 +48,7 @@
                       total-days (async/<! (dao/get-user-total-learn-days-chan user))
                       need-learn-card {:need_learn_count (async/<! (dao/get-user-need-learning-card-count user))}
                       statistics-table-data (async/<! (dao/get-user-daily-statistics user))
+                      ;; TODO not merge
                       statistics-data (merge need-learn-card
                                              total-days
                                              all-finish

@@ -42,6 +42,7 @@ CREATE TABLE user_learn_card (
 CREATE TABLE user_daily_statistics (
        user_email TEXT NOT NULL,
        date Date NOT NULL,
+       continuous_days NUMBER,
        learn_time INTEGER DEFAULT 0,
        easy_time INTEGER DEFAULT 0,
        remeber_time INTEGER DEFAULT 0,

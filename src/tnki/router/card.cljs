@@ -2,6 +2,7 @@
     (:require [tnki.dao :as dao]
             [tnki.middle :as middle]
             [tnki.auth :as auth]
+            [tnki.util :as util]
             [cljs.core.async :as async]
             [cljs.nodejs :as nodejs]
             [clojure.string :as string]
@@ -88,7 +89,6 @@
                      )
                    ))))
 
-
 (. router (get "/api/cards/user/:userId/learn/today"
             middle/auth-jwt
             (fn [req res]
@@ -108,6 +108,8 @@
                       (.where "next_learn_date" "<" (.getTime (js/Date.)))
                       (.andWhere "user_email" "=" (:email user))
                       (.then (fn [result]
+                               (let [count (.-length result)])
+                               (util/handle-today-finish user)
                                (.send res (camelcase-keys (clj->js result))))))
                   )
                 ))))
@@ -139,9 +141,6 @@
                                                                    (.add next-learn-days "days")
                                                                    (.valueOf))}))
                            )
-                       (-> (knex "learning_card")
-                           (.where "id" "=" learning-card-id)
-                           (.increment db-memory-level-name 1))
                        (-> (knex "user_daily_statistics")
                            (.where "user_email" (:email user))
                            (.andWhere "date" "=" (-> (moment)

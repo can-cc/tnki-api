@@ -55,3 +55,18 @@
         (.then (fn [results]
                  (go (async/>! out (first (js->clj results :keywordize-keys true)))))))
     out))
+
+(defn get-yestoday-statistics [user]
+  (let [out (async/chan 1)
+        yestoday-str (-> (moment)
+                         (.subtract 1 "days")
+                         (.format "YYYY-MM-DD"))]
+    (-> (knex "user_daily_statistics")
+        (.select "*")
+        (.where "user_email" "=" (:email user))
+        (.andWhere "date" "=" yestoday-str)
+        (.then (fn [results]
+                 (go (async/>! out (first (js->clj results :keywordize-keys true))))))
+        )
+    out))
+

@@ -49,6 +49,11 @@ Clean project specific out:
 Build a single release artifact with the following script and then open `index_release.html` in your browser.
 
     ./scripts/release
+    
+### setup database(sqlite3)
+```
+sqlite3 db.sqlite3 < create-table.sql
+```
 
 ## License
 

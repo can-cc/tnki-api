@@ -2,7 +2,7 @@ CREATE TABLE user (
        id INTEGER PRIMARY KEY AUTOINCREMENT,
        email TEXT NOT NULL UNIQUE,
        password TEXT NOT NULL,
-       created_at TEXT,
+       created_at TEXT
        -- learn_time_base INTEGER DEFAULT 0
 );
 

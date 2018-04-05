@@ -72,3 +72,4 @@ RUN apk add --update wget ca-certificates bash && \
 # install git (for version tagging)
 RUN apk add --no-cache git && \
     rm -rf /tmp/* /var/cache/apk/*
+

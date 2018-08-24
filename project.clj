@@ -21,6 +21,7 @@
                        [ora "v1.3.0"]
                        [express "v4.15.5"]
                        [bcryptjs "v2.4.3"]
+                       [express-sanitizer "v1.0.4"]
                        [body-parser "v1.18.2"]
                        [knex "v0.13.0"]
                        [multer "v1.3.0"]

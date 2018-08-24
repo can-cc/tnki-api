@@ -32,7 +32,7 @@
                         (.select "*")
                         (.where (clj->js {:email email}))
                         (.then (fn [results]
-                                 (if (not results)
+                                 (if (= 0 (count results))
                                    (do
                                      (.status res 401)
                                      (.send res))

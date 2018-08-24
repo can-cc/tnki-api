@@ -24,6 +24,7 @@
 (defonce path (nodejs/require "path"))
 (defonce bcrypt (nodejs/require "bcryptjs"))
 (defonce moment (nodejs/require "moment"))
+(defonce expressSanitizer (nodejs/require "express-sanitizer"))
 (def knex ((nodejs/require "knex")
            (clj->js {:client "sqlite3"
                      :connection {:filename "./db.sqlite3"}
@@ -31,6 +32,7 @@
 
 (def app (express))
 (.use app (.json body-parser))
+(.use app (expressSanitizer))
 
 (. app (get "/api/hello"
             (fn [req res]

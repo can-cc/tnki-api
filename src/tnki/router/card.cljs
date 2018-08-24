@@ -120,7 +120,7 @@
                 )
               )))
 
-(. router (post "/api/cards/:id/memory"
+(. router (post "/api/card/learn/:id/memory"
              middle/auth-jwt
              (fn [req res]
                (let [body (.-body req)
@@ -139,19 +139,25 @@
                                        "2" 1
                                        1)]
                  (-> (js/Promise.all
-                      [(-> (knex "learning_card")
+                      [
+                       (-> (knex "learning_card")
                            (.where "id" "=" learning-card-id)
-                           (.increment db-memory-level-name 1)
                            (.update (clj->js {:next_learn_date (-> (moment)
                                                                    (.startOf "day" )
                                                                    (.add next-learn-days "days")
                                                                    (.valueOf))}))
                            )
+                       (-> (knex "learning_card")
+                           (.where "id" "=" learning-card-id)
+                           (.increment db-memory-level-name 1)
+                           )
+
                        (-> (knex "user_daily_statistics")
                            (.where "user_email" (:email user))
                            (.andWhere "date" "=" (-> (moment)
                                                      (.format "YYYY-MM-DD")))
                            (.increment "learn_time" 1))
+
                        (-> (knex "user_daily_statistics")
                            (.where "user_email" (:email user))
                            (.andWhere "date" "=" (-> (moment)

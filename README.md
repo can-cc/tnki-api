@@ -5,7 +5,7 @@ other version for anki
 
 ## Overview
 
-FIXME: Write a paragraph about the library/project and highlight its goals.
+tnki api
 
 ## Setup
 
@@ -50,13 +50,26 @@ Build a single release artifact with the following script and then open `index_r
 
     ./scripts/release
     
+### start server
+
+`./tnki-server`
+    
 ### setup database(sqlite3)
 ```
 sqlite3 db.sqlite3 < create-table.sql
 ```
 
+
+## Docker
+### dockerfile
+`./Dockerfile`
+
+### docker-compose 
+
+in `tnki-client` project
+
 ## License
 
-Copyright © 2016 FIXME
+Copyright © 2018 MIT
 
 Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.

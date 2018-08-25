@@ -66,11 +66,6 @@
 (defn -main [& args]
   (doto (.createServer http #(app %1 %2))
     (.listen 3000 "0.0.0.0"))
-  (doto (.createServer https (clj->js
-                              {:key (.readFileSync fs "/etc/letsencrypt/live/tnki.octopuese.xyz/privkey.pem")
-                               :cert (.readFileSync fs "/etc/letsencrypt/live/tnki.octopuese.xyz/cert.pem")})
-                       app)
-    (.listen 3001 "0.0.0.0"))
   (println "server listen on http://0.0.0.0:3000"))
 
 (set! *main-cli-fn* -main)

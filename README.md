@@ -7,6 +7,8 @@ other version for anki
 
 tnki api
 
+`http://localhost:3500`
+
 ## Setup
 
 Most of the following scripts require [rlwrap](http://utopia.knoware.nl/~hlub/uck/rlwrap/) (on OS X installable via brew).

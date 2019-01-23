@@ -1,4 +1,4 @@
-FROM naartjie/alpine-lein-node
+FROM fwchen/alpine-lein-node
 
 WORKDIR /app
 

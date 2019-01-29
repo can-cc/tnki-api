@@ -66,6 +66,6 @@
 (defn -main [& args]
   (doto (.createServer http #(app %1 %2))
     (.listen 3500 "0.0.0.0"))
-  (println "server listen on http://0.0.0.0:3000"))
+  (println "server listen on http://0.0.0.0:3500"))
 
 (set! *main-cli-fn* -main)

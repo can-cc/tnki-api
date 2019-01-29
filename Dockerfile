@@ -6,3 +6,4 @@ COPY . ./
 
 RUN ./scripts/nbuild
 
+CMD [ "./tnki-server" ]

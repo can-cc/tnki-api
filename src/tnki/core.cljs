@@ -21,6 +21,7 @@
 (defonce http (nodejs/require "http"))
 (defonce https (nodejs/require "https"))
 (defonce fs (nodejs/require "fs"))
+(defonce cors (nodejs/require "cors"))
 (defonce path (nodejs/require "path"))
 (defonce bcrypt (nodejs/require "bcryptjs"))
 (defonce moment (nodejs/require "moment"))
@@ -31,7 +32,14 @@
                      :useNullAsDefault true})))
 
 (def app (express))
+(def cors-options (clj->js {
+                            :origin "capacitor://localhost"
+                            }))
+
+
 (.use app (.json body-parser))
+(.use app (cors cors-options))
+
 (.use app (expressSanitizer))
 
 (. app (get "/api/hello"

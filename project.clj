@@ -18,6 +18,7 @@
             [io.aviso/pretty "0.1.34"]]
   :npm {:dependencies [[source-map-support "0.4.0"]
                        [colors "1.1.2"]
+                       [cors "2.8.5"]
                        [ora "v1.3.0"]
                        [express "v4.15.5"]
                        [bcryptjs "v2.4.3"]

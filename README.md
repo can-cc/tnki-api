@@ -5,7 +5,7 @@ other version for anki
 
 ## Overview
 
-tnki api
+tnki api will listen on `3500` 
 
 `http://localhost:3500`
 
@@ -67,11 +67,12 @@ sqlite3 db.sqlite3 < create-table.sql
 `./Dockerfile`
 
 ### docker-compose 
-
 in `tnki-client` project
 
-## License
+### build docker
+`docker built .`
 
-Copyright © 2018 MIT
+## License
+Copyright © 2019 MIT
 
 Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.

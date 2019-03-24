@@ -34,6 +34,7 @@
 (def app (express))
 (def cors-options (clj->js {
                             :origin "capacitor://localhost"
+                            :exposedHeaders "jwt,user-id"
                             }))
 
 

@@ -1,4 +1,4 @@
-FROM fwchen/alpine-lein-node
+FROM fwchen/alpine-lein-node:latest
 
 WORKDIR /app
 
